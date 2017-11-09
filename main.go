@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"time"
-	"ubiquity/device"
-	"ubiquity/httphandler"
 
 	"gobot.io/x/gobot/drivers/gpio"
 	"gobot.io/x/gobot/platforms/raspi"
 
+	"github.com/deepakkamesh/ubiquity/device"
+	"github.com/deepakkamesh/ubiquity/httphandler"
 	"github.com/golang/glog"
 )
 

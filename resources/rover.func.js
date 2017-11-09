@@ -88,9 +88,17 @@ $(document).ready(function() {
             MsgType: MsgType.CMD,
             Data: {
                 CmdType: cmd,
-                Param: "",
+                Param: parseInt($('#drive_velocity_sel').val()),
             }
         }));
     });
+
+    var driveVelSel = document.querySelector('#drive_velocity_sel');
+    driveVelSel.addEventListener('click', function() {
+        val = $('#drive_velocity_sel').val();
+        $("#drive_velocity_sel_disp").empty()
+        $("#drive_velocity_sel_disp").append(val);
+    });
+
 
 });

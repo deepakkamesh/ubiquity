@@ -3,6 +3,8 @@ package device
 import (
 	"time"
 
+	"github.com/golang/glog"
+
 	"gobot.io/x/gobot/drivers/gpio"
 )
 
@@ -64,6 +66,7 @@ func (s *Ubiquity) MotorControl(dir int, dur time.Duration) error {
 		s.motorLeftBwd.DigitalWrite(1)
 	}
 
+	glog.Infof("got %v", dur)
 	time.Sleep(dur * time.Millisecond)
 	return s.AllMotorStop()
 }

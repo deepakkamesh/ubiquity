@@ -3,8 +3,9 @@ package httphandler
 import (
 	"encoding/json"
 	"net/http"
-	"ubiquity/device"
+	"time"
 
+	"github.com/deepakkamesh/ubiquity/device"
 	"github.com/golang/glog"
 	"github.com/gorilla/websocket"
 )
@@ -104,9 +105,11 @@ func (s *Server) controlSocket(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (s *Server) execute(c interface{}) {
-	dir := c.(map[string]interface{})["CmdType"].(float64)
+	cmd := c.(map[string]interface{})
+	dir := cmd["CmdType"].(float64)
+	dur := cmd["Param"].(float64)
 
-	if err := s.dev.MotorControl(int(dir), 100); err != nil {
+	if err := s.dev.MotorControl(int(dir), time.Duration(dur)); err != nil {
 		glog.Errorf("Failed to move motor %v", err)
 	}
 }
