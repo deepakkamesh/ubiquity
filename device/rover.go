@@ -8,6 +8,13 @@ import (
 	"gobot.io/x/gobot/drivers/gpio"
 )
 
+const (
+	DRIVE_FWD = iota
+	DRIVE_BWD
+	DRIVE_LEFT
+	DRIVE_RIGHT
+)
+
 type Ubiquity struct {
 	motorRightFwd *gpio.DirectPinDriver
 	motorRightBwd *gpio.DirectPinDriver

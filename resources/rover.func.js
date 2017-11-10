@@ -1,82 +1,53 @@
 // Constants.
 // Handle websocket registrations and update Rover data panels.
 
-var MsgType = {
+var CmdType = {
     ERR: 0,
     CMD: 1,
-    AUDIO: 2
+    AUDIO_START: 2,
+    AUDIO_STOP: 3,
+    DRIVE_FWD: 4,
+    DRIVE_BWD: 5,
+    DRIVE_LEFT: 6,
+    DRIVE_RIGHT: 7
 }
 
-var CmdType = {
-    FWD: 0,
-    BWD: 1,
-    LEFT: 2,
-    RIGHT: 3,
-}
 
+// Control message handling.
 $(document).ready(function() {
 
-    ws = new WebSocket("wss://" + window.location.host + "/datastream");
-
-    ws.onopen = function(evt) {
+    wsCtrl = new WebSocket("wss://" + window.location.host + "/control");
+    wsCtrl.onopen = function(evt) {
         $("#conn_spinner").show();
     }
 
-    ws.onclose = function(evt) {
+    wsCtrl.onclose = function(evt) {
         $("#conn_spinner").hide();
-        ws = null;
+        wsCtrl = null;
     }
 
-    ws.onmessage = function(evt) {
+    wsCtrl.onmessage = function(evt) {
         st = JSON.parse(evt.data);
-        if (st.Err != "") {
-            console.log(st.Err);
-        }
-        piData = st.Pi;
-        for (var pktID in piData) {
-            pkt = piData[pktID];
-            switch (pktID) {
-                case "0": //I2CBus State.
-                    setTimeout(function(pkt) {
-                        if (pkt == 1) {
-                            $('#i2c_en_label')[0].MaterialSwitch.on();
-                            return;
-                        }
-                        $('#i2c_en_label')[0].MaterialSwitch.off();
-                        return;
-                    }, 100, pkt);
-
-                case "1": // AuxPower State.
-                    setTimeout(function(pkt) {
-                        if (pkt == 1) {
-                            $('#aux_power_label')[0].MaterialSwitch.on();
-                            return;
-                        }
-                        $('#aux_power_label')[0].MaterialSwitch.off();
-                        return;
-                    }, 100, pkt);
-            }
-        }
     }
 
-    ws.onerror = function(evt) {
-        print("ERROR: " + evt.data);
+    wsCtrl.onerror = function(evt) {
+        print("Control ERROR: " + evt.data);
     }
 
     $(document).keydown(function(e) {
         var cmd
         switch (e.which) {
             case 37:
-                cmd = CmdType.LEFT;
+                cmd = CmdType.DRIVE_LEFT;
                 break;
             case 38:
-                cmd = CmdType.FWD;
+                cmd = CmdType.DRIVE_FWD;
                 break;
             case 39:
-                cmd = CmdType.RIGHT;
+                cmd = CmdType.DRIVE_RIGHT;
                 break;
             case 40:
-                cmd = CmdType.BWD;
+                cmd = CmdType.DRIVE_BWD;
                 break;
             default:
                 cmd = -1;
@@ -84,13 +55,12 @@ $(document).ready(function() {
         if (cmd == -1) {
             return
         }
-        ws.send(JSON.stringify({
-            MsgType: MsgType.CMD,
-            Data: {
-                CmdType: cmd,
-                Param: parseInt($('#drive_velocity_sel').val()),
-            }
-        }));
+        var cmd = JSON.stringify({
+            CmdType: cmd,
+            Data: parseInt($('#drive_velocity_sel').val()),
+        });
+        console.log(cmd);
+        wsCtrl.send(cmd);
     });
 
     var driveVelSel = document.querySelector('#drive_velocity_sel');
@@ -99,6 +69,19 @@ $(document).ready(function() {
         $("#drive_velocity_sel_disp").empty()
         $("#drive_velocity_sel_disp").append(val);
     });
+
+});
+
+// Audio handling.
+$(document).ready(function() {
+
+    ws = new WebSocket("wss://" + window.location.host + "/audiostream");
+
+
+    ws.onerror = function(evt) {
+        print("ERROR: " + evt.data);
+    }
+
 
     var downsampleBuffer = function(buffer, sampleRate, outSampleRate) {
         if (outSampleRate == sampleRate) {
