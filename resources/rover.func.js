@@ -16,7 +16,7 @@ var CmdType = {
 
 $(document).ready(function() {
 
-    ws = new WebSocket("ws://" + window.location.host + "/datastream");
+    ws = new WebSocket("wss://" + window.location.host + "/datastream");
 
     ws.onopen = function(evt) {
         $("#conn_spinner").show();
@@ -100,5 +100,91 @@ $(document).ready(function() {
         $("#drive_velocity_sel_disp").append(val);
     });
 
+    var downsampleBuffer = function(buffer, sampleRate, outSampleRate) {
+        if (outSampleRate == sampleRate) {
+            return buffer;
+        }
+        if (outSampleRate > sampleRate) {
+            throw "downsampling rate show be smaller than original sample rate";
+        }
+        var sampleRateRatio = sampleRate / outSampleRate;
+        var newLength = Math.round(buffer.length / sampleRateRatio);
+        var result = new Int16Array(newLength);
+        var offsetResult = 0;
+        var offsetBuffer = 0;
+        while (offsetResult < result.length) {
+            var nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
+            var accum = 0,
+                count = 0;
+            for (var i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
+                accum += buffer[i];
+                count++;
+            }
 
+            result[offsetResult] = Math.min(1, accum / count) * 0x7FFF;
+            offsetResult++;
+            offsetBuffer = nextOffsetBuffer;
+        }
+        return result;
+    }
+
+    function floatTo16Bit(inputArray, startIndex) {
+        var output = new Uint16Array(inputArray.length - startIndex);
+        for (var i = 0; i < inputArray.length; i++) {
+            var s = Math.max(-1, Math.min(1, inputArray[i]));
+            output[i] = s < 0 ? s * 0x80 : s * 0x7F;
+        }
+        return output;
+    }
+    // Audio stream handling.
+    var streamControl;
+    var handleSuccess = function(stream) {
+        var context = new AudioContext();
+        var source = context.createMediaStreamSource(stream);
+        var processor = context.createScriptProcessor(8192, 1, 1);
+
+        source.connect(processor);
+        processor.connect(context.destination);
+
+        processor.onaudioprocess = function(e) {
+            if (!streamControl) {
+                return;
+            }
+
+            var ib = e.inputBuffer;
+            var i = ib.getChannelData(0);
+            //var conv = floatTo16Bit(i, 0);
+            var conv = downsampleBuffer(i, 44100, 4000);
+            // console.log(conv)
+            ws.send(conv);
+        };
+    };
+    navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: false
+        })
+        .then(handleSuccess);
+
+
+
+    var recordAudioBtn = document.querySelector('#record_audio');
+    recordAudioBtn.addEventListener('mousedown', function() {
+        streamControl = true;
+        console.log("started");
+    });
+    recordAudioBtn.addEventListener('touchstart', function() {
+        streamControl = true;
+        console.log("started");
+    });
+
+    recordAudioBtn.addEventListener('mouseup', function() {
+        streamControl = false;
+        console.log("stop");
+    });
+    recordAudioBtn.addEventListener('touchend', function() {
+        streamControl = false;
+        console.log("stop");
+    });
+
+    // End audio exp.
 });

@@ -7,7 +7,7 @@ BUILDTIME="`date '+%Y-%m-%d_%I:%M:%S%p'`"
 GITHASH="`git rev-parse --short=7 HEAD`"
 VER="-X main.buildtime=$BUILDTIME -X main.githash=$GITHASH"
 
-if [ $# -lt 2 ]; then
+if [ $# -lt 1 ]; then
 #if [ "$1" == "help" ]; then
 	echo "build.sh < arm | noarm > < ip address > <all | res | bin >"
 	exit
@@ -21,7 +21,8 @@ if [ "$3" != "res" ]; then
 		GOOS=linux GOARCH=arm GOARM=6 CGO_ENABLED=0 go build -ldflags "$VER" ../main.go 
 	else
 		echo "Compiling on local machine $BUILDTIME $GITHASH"
-		go build -ldflags "$VER" $BINARY
+	PKG_CONFIG_PATH=/usr/local/Cellar/portaudio/19.6.0/lib/pkgconfig/ \
+	go build  -ldflags "$VER" ../main.go
 	fi
 fi
 

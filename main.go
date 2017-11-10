@@ -19,12 +19,14 @@ var (
 
 func main() {
 	var (
-		res          = flag.String("resources", "./resources", "resources directory")
+		res          = flag.String("resources", "../resources", "resources directory")
 		httpHostPort = flag.String("http_port", ":8080", "host:port number for http")
 		mlfwd        = flag.String("left_motor_fwd_pin", "11", "Motor controller")
 		mlbwd        = flag.String("left_motor_bwd_pin", "7", "Motor controller")
 		mrfwd        = flag.String("right_motor_fwd_pin", "13", "Motor controller")
 		mrbwd        = flag.String("right_motor_bwd_pin", "15", "Motor controller")
+
+		enPi = flag.Bool("enable_pi", false, "Enable PI")
 	)
 	flag.Parse()
 	glog.Infof("Starting Ubiquity ver %s build on %s", githash, buildtime)
@@ -37,31 +39,35 @@ func main() {
 		}
 	}()
 
-	// Initialize PI Adaptor.
-	pi := raspi.NewAdaptor()
-	if err := pi.Connect(); err != nil {
-		glog.Fatalf("Failed to initialize Adapter:%v", err)
-	}
+	var motorRightBwd, motorRightFwd, motorLeftBwd, motorLeftFwd *gpio.DirectPinDriver
 
-	// Initialize devices.
-	motorRightFwd := gpio.NewDirectPinDriver(pi, *mrfwd)
-	if err := motorRightFwd.Start(); err != nil {
-		glog.Fatalf("Failed to setup GPIO: %v", err)
-	}
+	if *enPi {
+		// Initialize PI Adaptor.
+		pi := raspi.NewAdaptor()
+		if err := pi.Connect(); err != nil {
+			glog.Fatalf("Failed to initialize Adapter:%v", err)
+		}
 
-	motorRightBwd := gpio.NewDirectPinDriver(pi, *mrbwd)
-	if err := motorRightBwd.Start(); err != nil {
-		glog.Fatalf("Failed to setup GPIO: %v", err)
-	}
+		// Initialize devices.
+		motorRightFwd = gpio.NewDirectPinDriver(pi, *mrfwd)
+		if err := motorRightFwd.Start(); err != nil {
+			glog.Fatalf("Failed to setup GPIO: %v", err)
+		}
 
-	motorLeftFwd := gpio.NewDirectPinDriver(pi, *mlfwd)
-	if err := motorRightFwd.Start(); err != nil {
-		glog.Fatalf("Failed to setup GPIO: %v", err)
-	}
+		motorRightBwd = gpio.NewDirectPinDriver(pi, *mrbwd)
+		if err := motorRightBwd.Start(); err != nil {
+			glog.Fatalf("Failed to setup GPIO: %v", err)
+		}
 
-	motorLeftBwd := gpio.NewDirectPinDriver(pi, *mlbwd)
-	if err := motorRightBwd.Start(); err != nil {
-		glog.Fatalf("Failed to setup GPIO: %v", err)
+		motorLeftFwd = gpio.NewDirectPinDriver(pi, *mlfwd)
+		if err := motorRightFwd.Start(); err != nil {
+			glog.Fatalf("Failed to setup GPIO: %v", err)
+		}
+
+		motorLeftBwd = gpio.NewDirectPinDriver(pi, *mlbwd)
+		if err := motorRightBwd.Start(); err != nil {
+			glog.Fatalf("Failed to setup GPIO: %v", err)
+		}
 	}
 
 	dev := device.New(motorRightFwd, motorRightBwd, motorLeftFwd, motorLeftBwd)
