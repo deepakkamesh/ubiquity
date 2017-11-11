@@ -21,6 +21,9 @@ const (
 	DRIVE_BWD
 	DRIVE_LEFT
 	DRIVE_RIGHT
+	SERVO_UP
+	SERVO_DOWN
+	SERVO_STEP
 )
 
 // Control Message.
@@ -30,15 +33,20 @@ type ControlMsg struct {
 }
 
 type Server struct {
-	connCount int // number of connected http clients.
-	dev       *device.Ubiquity
-	audio     *device.Audio
+	dev   *device.Ubiquity
+	audio *device.Audio
+
+	connCount  int // number of connected http clients.
+	servoStep  int // Servo step for each click.
+	servoAngle int // Current Angle for servo.
 }
 
 func New(dev *device.Ubiquity, aud *device.Audio) *Server {
 	return &Server{
-		dev:   dev,
-		audio: aud,
+		dev:        dev,
+		audio:      aud,
+		servoAngle: 90,
+		servoStep:  30,
 	}
 }
 
@@ -106,24 +114,44 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 				glog.Errorf("Failed to move motor %v", err)
 			}
 
-		case AUDIO_START:
-			//s.play(msg.Data)
-		}
+		case SERVO_STEP:
+			s.servoStep = int(msg.Data.(float64))
 
-		/*
-			jsMsg, err := json.Marshal(m.data)
-			if err != nil {
-				glog.Errorf("Failed to unmarshall: %v", err)
+		case SERVO_UP:
+			if err := s.dev.Servo.SetAngle(s.servoAngle + s.servoStep); err != nil {
+				sendError(err.Error(), c)
 				continue
 			}
-			m.data.Err = ""
+			s.servoAngle += s.servoStep
 
-			err = c.WriteMessage(websocket.TextMessage, jsMsg)
-			if err != nil {
-				glog.Errorf("Failed to write: %v", err)
-				retur1
+		case SERVO_DOWN:
+			if err := s.dev.Servo.SetAngle(s.servoAngle - s.servoStep); err != nil {
+				sendError(err.Error(), c)
+				continue
 			}
-		*/
+			s.servoAngle -= s.servoStep
+
+		case AUDIO_START:
+		}
+
+	}
+}
+
+// sendError sends an error packet to the browser.
+func sendError(errorString string, c *websocket.Conn) {
+	msg := ControlMsg{
+		CmdType: ERR,
+		Data:    errorString,
+	}
+
+	jsMsg, err := json.Marshal(msg)
+	if err != nil {
+		glog.Errorf("Failed to unmarshall: %v", err)
+	}
+
+	err = c.WriteMessage(websocket.TextMessage, jsMsg)
+	if err != nil {
+		glog.Errorf("Failed to write: %v", err)
 	}
 }
 

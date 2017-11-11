@@ -43,6 +43,7 @@ func main() {
 	var (
 		motorRightBwd, motorRightFwd *gpio.DirectPinDriver
 		motorLeftBwd, motorLeftFwd   *gpio.DirectPinDriver
+		servo                        *device.Servo
 	)
 
 	if *enPi {
@@ -72,10 +73,12 @@ func main() {
 		if err := motorRightBwd.Start(); err != nil {
 			glog.Fatalf("Failed to setup GPIO: %v", err)
 		}
+
+		servo = device.NewServo(20000, "16", pi)
 	}
 
 	// Initialize new Ubiquity Device.
-	dev := device.New(motorRightFwd, motorRightBwd, motorLeftFwd, motorLeftBwd)
+	dev := device.New(motorRightFwd, motorRightBwd, motorLeftFwd, motorLeftBwd, servo)
 
 	// Initialize audio device.
 	aud := device.NewAudio()

@@ -73,15 +73,10 @@
         <header class="mdl-layout__header">
             <div class="mdl-layout__header-row">
                 <ul>
-                    <span class="mdl-layout-title">Rover Control Panel
-               				[Mode - <span id="rb_oi_mode">unknown</span>]
+                    <span class="mdl-layout-title"> Ubiquity Control Panel
                     </span>
                 </ul>
-                <ul>
-                    <span class="mdl-layout-title">Batt:
-               				<span id="rb_batt_charge">10</span>%
-                    </span>
-                </ul>
+
                 <ul>
                     <div id="conn_spinner" class="mdl-spinner mdl-js-spinner is-active"></div>
                 </ul>
@@ -100,48 +95,8 @@
                 </div>
             </header>
 
-            <!-- POWER/MODE CONTROLS -->
+            <!-- SIDE NAV BAR -->
             <nav class="mdl-navigation">
-                <ul>
-                    <button id="reset_roomba_btn" class="mdl-button mdl-js-button mdl-button--raised ">
-                   		RESET ROOMBA  
-                   	</button>
-                </ul>
-                <ul>
-                    <label id="mode_passive_label" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="mode_passive">
-									       <input type="radio" id="mode_passive" class="mdl-radio__button" name="roomba_mode" value="passive_mode">
-									       <span class="mdl-radio__label">Passive Mode</span>
-								 		</label>
-                </ul>
-                <ul>
-                    <label id="mode_safe_label" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="mode_safe">
-									      <input type="radio" id="mode_safe" class="mdl-radio__button" name="roomba_mode" value="safe_mode">
-												<span class="mdl-radio__label">Safe Mode</span>
-										</label>
-                </ul>
-                <ul>
-                    <label id="mode_full_label" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="mode_full">
-										        <input type="radio" id="mode_full" class="mdl-radio__button" name="roomba_mode" value="full_mode">
-									          <span class="mdl-radio__label">Full Mode</span>
-									  </label>
-                </ul>
-                <ul>
-                    <button id="seek_dock_btn" class="mdl-button mdl-js-button mdl-button--raised ">
-                   		Seek Dock 
-                   	</button>
-                </ul>
-                <ul>
-                    <label id="aux_power_label" class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="aux_power">
-                        <input type="checkbox" id="aux_power" class="mdl-switch__input" >
-                        <span class="mdl-switch__label">Aux Power</span>
-                	  </label>
-                </ul>
-                <ul>
-                    <label id="i2c_en_label" class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="i2c_en">
-                        <input type="checkbox" id="i2c_en" class="mdl-switch__input" >
-                        <span class="mdl-switch__label">Enable I2C </span>
-                	  </label>
-                </ul>
             </nav>
         </div>
 
@@ -158,7 +113,6 @@
                 <!-- Drive Buttons -->
                 <div class="mdl-cell mdl-cell--3-col">
                     <h4 align=center> Drive Control </h4>
-
                     <ul>
                         &emsp;&emsp;&emsp;&emsp;
                         <button id="motor-forward" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
@@ -190,16 +144,86 @@
                     </span>
                 </div>
 
-                <!-- Audio Capture -->
+                <!-- Servo Control -->
                 <div class="mdl-cell mdl-cell--3-col">
-                    <button id="record_audio" class="mdl-button mdl-js-button mdl-button--raised ">
-                   		Rec
-                   	</button>
+                    <h4 align=center> Servo Control </h4>
+
+                    <ul>
+                        &emsp;&emsp;&emsp;&emsp;
+                        <button id="servo-up" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+                          <li class="material-icons">keyboard_arrow_up</li>
+                        </button>
+
+                        <br/>
+                        <br/>
+
+                        <button id="servo-left" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+                            <li class="material-icons">keyboard_arrow_left</li>
+                        </button> &emsp;&emsp;&emsp;&emsp;
+
+                        <button id="servo-right" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+                            <li class="material-icons">keyboard_arrow_right</li>
+												</button>
+
+                        <br/>
+                        <br/> &emsp;&emsp;&emsp;&emsp;
+
+                        <button id="servo-down" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+                            <li class="material-icons">keyboard_arrow_down</li>
+                        </button>
+                    </ul>
+                    <!-- Angle selector for drive -->
+                    <input id="servo_angle_step" class="mdl-slider mdl-js-slider" type="range" min="10" max="60" value="30" tabindex="0">
+                    <span class="mdl-chip">
+                       <span class="mdl-chip__text" id="servo_angle_step_disp">Select Servo Step</span>
+                    </span>
+                </div>
+
+                <!-- Servo Angle ToolTips -->
+                <div class="mdl-tooltip" data-mdl-for="servo-down">
+                    <span id="servo-down-tip">0</span>'
+                </div>
+                <div class="mdl-tooltip" data-mdl-for="servo-up">
+                    <span id="servo-up-tip">0</span>'
+                </div>
+                <div class="mdl-tooltip" data-mdl-for="servo-left">
+                    <span id="servo-left-tip">10</span>'
+                </div>
+                <div class="mdl-tooltip" data-mdl-for="servo-right">
+                    <span id="servo-right-tip">0</span>'
+                </div>
+
+                <!-- Servo Angle ToolTips -->
+                <div class="mdl-tooltip" data-mdl-for="servo-down">
+                    <span id="servo-down-tip">0</span>'
+                </div>
+                <div class="mdl-tooltip" data-mdl-for="servo-up">
+                    <span id="servo-up-tip">0</span>'
+                </div>
+                <div class="mdl-tooltip" data-mdl-for="servo-left">
+                    <span id="servo-left-tip">10</span>'
+                </div>
+                <div class="mdl-tooltip" data-mdl-for="servo-right">
+                    <span id="servo-right-tip">0</span>'
                 </div>
 
             </div>
 
-        </main>
+            <!-- Audio Capture -->
+            <div class="mdl-cell mdl-cell--2-col">
+                <button id="record_audio" class="mdl-button mdl-js-button mdl-button--raised ">
+                   		Rec
+      				 	</button>
+            </div>
+
+    </div>
+
+    <div id="error-popup" class="mdl-js-snackbar mdl-snackbar">
+        <div class="mdl-snackbar__text"></div>
+        <button class="mdl-snackbar__action" type="button"></button>
+    </div>
+
+    </main>
     </div>
     <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 </body>

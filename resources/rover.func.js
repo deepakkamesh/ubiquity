@@ -9,12 +9,15 @@ var CmdType = {
     DRIVE_FWD: 4,
     DRIVE_BWD: 5,
     DRIVE_LEFT: 6,
-    DRIVE_RIGHT: 7
+    DRIVE_RIGHT: 7,
+    SERVO_UP: 8,
+    SERVO_DOWN: 9,
+    SERVO_STEP: 10,
 }
 
-
-// Control message handling.
+// Control message handlers
 $(document).ready(function() {
+    var errorContainer = document.querySelector('#error-popup');
 
     wsCtrl = new WebSocket("wss://" + window.location.host + "/control");
     wsCtrl.onopen = function(evt) {
@@ -27,42 +30,57 @@ $(document).ready(function() {
     }
 
     wsCtrl.onmessage = function(evt) {
-        st = JSON.parse(evt.data);
+        msg = JSON.parse(evt.data);
+        console.log(msg);
+
+        switch (msg.CmdType) {
+            case CmdType.ERR:
+                var err = {
+                    message: 'Error: ' + msg.Data
+                };
+                errorContainer.MaterialSnackbar.showSnackbar(err);
+        }
     }
 
     wsCtrl.onerror = function(evt) {
         print("Control ERROR: " + evt.data);
     }
+});
 
-    $(document).keydown(function(e) {
-        var cmd
-        switch (e.which) {
-            case 37:
-                cmd = CmdType.DRIVE_LEFT;
-                break;
-            case 38:
-                cmd = CmdType.DRIVE_FWD;
-                break;
-            case 39:
-                cmd = CmdType.DRIVE_RIGHT;
-                break;
-            case 40:
-                cmd = CmdType.DRIVE_BWD;
-                break;
-            default:
-                cmd = -1;
-        }
-        if (cmd == -1) {
-            return
-        }
-        var cmd = JSON.stringify({
-            CmdType: cmd,
-            Data: parseInt($('#drive_velocity_sel').val()),
-        });
-        console.log(cmd);
-        wsCtrl.send(cmd);
+// Callback for keyboard keys Drive Control.
+$(document).keydown(function(e) {
+    var cmd
+    switch (e.which) {
+        case 37:
+            cmd = CmdType.DRIVE_LEFT;
+            break;
+        case 38:
+            cmd = CmdType.DRIVE_FWD;
+            break;
+        case 39:
+            cmd = CmdType.DRIVE_RIGHT;
+            break;
+        case 40:
+            cmd = CmdType.DRIVE_BWD;
+            break;
+        default:
+            cmd = -1;
+    }
+    if (cmd == -1) {
+        return
+    }
+    var cmd = JSON.stringify({
+        CmdType: cmd,
+        Data: parseInt($('#drive_velocity_sel').val()),
     });
+    console.log(cmd);
 
+    wsCtrl.send(cmd);
+});
+
+// Servo and Drive Controls.
+$(document).ready(function() {
+    // Drive velocity selector.
     var driveVelSel = document.querySelector('#drive_velocity_sel');
     driveVelSel.addEventListener('click', function() {
         val = $('#drive_velocity_sel').val();
@@ -70,19 +88,58 @@ $(document).ready(function() {
         $("#drive_velocity_sel_disp").append(val);
     });
 
+    // Servo Controls.
+    var servoDownButton = document.querySelector('#servo-down');
+    servoDownButton.addEventListener('click', function() {
+        var cmd = JSON.stringify({
+            CmdType: CmdType.SERVO_DOWN,
+        });
+        console.log(cmd);
+        wsCtrl.send(cmd);
+    });
+
+    var servoUpButton = document.querySelector('#servo-up');
+    servoUpButton.addEventListener('click', function() {
+        var cmd = JSON.stringify({
+            CmdType: CmdType.SERVO_UP,
+        });
+        console.log(cmd);
+        wsCtrl.send(cmd);
+    });
+
+    // TODO: Change to center and max or something.
+    var servoLeftButton = document.querySelector('#servo-left');
+    servoLeftButton.addEventListener('click', function() {});
+
+    var servoRightButton = document.querySelector('#servo-right');
+    servoRightButton.addEventListener('click', function() {});
+
+    // Set the step for Servo.
+    var servoAngleDeltaSel = document.querySelector('#servo_angle_step');
+    servoAngleDeltaSel.addEventListener('click', function() {
+        val = $('#servo_angle_step').val();
+        $("#servo_angle_step_disp").empty();
+        $("#servo_angle_step_disp").append(val);
+
+        var cmd = JSON.stringify({
+            CmdType: CmdType.SERVO_STEP,
+            Data: parseInt(val),
+        });
+        console.log(cmd);
+        wsCtrl.send(cmd);
+    });
 });
 
-// Audio handling.
+// Audio handlers.
 $(document).ready(function() {
 
     ws = new WebSocket("wss://" + window.location.host + "/audiostream");
-
 
     ws.onerror = function(evt) {
         print("ERROR: " + evt.data);
     }
 
-
+    // downsampleBuffer downsamples and converts to uint16.
     var downsampleBuffer = function(buffer, sampleRate, outSampleRate) {
         if (outSampleRate == sampleRate) {
             return buffer;
@@ -111,14 +168,16 @@ $(document).ready(function() {
         return result;
     }
 
-    function floatTo16Bit(inputArray, startIndex) {
-        var output = new Uint16Array(inputArray.length - startIndex);
-        for (var i = 0; i < inputArray.length; i++) {
-            var s = Math.max(-1, Math.min(1, inputArray[i]));
-            output[i] = s < 0 ? s * 0x80 : s * 0x7F;
-        }
-        return output;
-    }
+    /*
+        function floatTo16Bit(inputArray, startIndex) {
+            var output = new Uint16Array(inputArray.length - startIndex);
+            for (var i = 0; i < inputArray.length; i++) {
+                var s = Math.max(-1, Math.min(1, inputArray[i]));
+                output[i] = s < 0 ? s * 0x80 : s * 0x7F;
+            }
+            return output;
+        } */
+
     // Audio stream handling.
     var streamControl;
     var handleSuccess = function(stream) {
@@ -169,5 +228,4 @@ $(document).ready(function() {
         console.log("stop");
     });
 
-    // End audio exp.
 });
