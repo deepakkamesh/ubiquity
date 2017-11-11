@@ -16,8 +16,8 @@ Follow instructions on [blog](https://www.tinkernut.com/2017/04/adding-audio-out
  
 
 #### PWM setup.
-* Setup (pi-blaster)[https://github.com/sarfata/pi-blaster] for PWM support if there is a servo mount.
+* Setup [pi-blaster](https://github.com/sarfata/pi-blaster) for PWM support if there is a servo mount.
 
 #### References
-* (webcam lib)[https://github.com/blackjack/webcam]
+* [webcam lib](https://github.com/blackjack/webcam)
 *
