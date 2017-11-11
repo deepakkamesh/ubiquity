@@ -1,0 +1,19 @@
+# ubiquity
+Mini Rover that currently streams audio and video on a controllable platform.
+
+## Hardware Setup
+### Raspberry PI Zero W Setup
+
+#### Audio Setup.
+Follow instructions on [blog](https://www.tinkernut.com/2017/04/adding-audio-output-raspberry-pi-zero-tinkernut-workbench/) to send audio via PWM.
+
+*TL;DR*
+* echo "overlay=pwm-2chan,pin=18,func=2,pin2=13,func2=4" >> /boot/config.txt
+* or echo for one channel  "overlay=pwm,pin=18,func=2" >> /boot/config.txt
+* Force audio via 3.5mm jack in raspi-config
+* Build a low pass filter as shown in the above link.
+* Test by "aplay /usr/share/sounds/alsa/Front_Center.wav"
+ 
+
+#### PWM setup.
+
