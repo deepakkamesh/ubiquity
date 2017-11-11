@@ -4,7 +4,12 @@
 # $3 host to push binary to. eg. 10.0.0.20
 
 LOC=$(dirname "$0")
-PROJECT_ROOT="/home/dkg/Projects/"
+HOSTNAME=$(hostname)
+if [ $HOSTNAME == "dkg-macbookpro.roam.corp.google.com" ]; then
+	PROJECT_ROOT="/Users/dkg/Projects/"
+else
+	PROJECT_ROOT="/home/dkg/Projects/"
+fi
 GOROOT="/usr/local/go"
 export GOPATH="$PROJECT_ROOT/golang"
 BUILDTIME="`date '+%Y-%m-%d_%I:%M:%S%p'`"
