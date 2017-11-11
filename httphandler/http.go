@@ -2,14 +2,12 @@ package httphandler
 
 import (
 	"bytes"
-	"encoding/binary"
 	"encoding/json"
 	"net/http"
 	"time"
 
 	"github.com/deepakkamesh/ubiquity/device"
 	"github.com/golang/glog"
-	"github.com/gordonklaus/portaudio"
 	"github.com/gorilla/websocket"
 )
 
@@ -32,13 +30,15 @@ type ControlMsg struct {
 }
 
 type Server struct {
-	connCount int
+	connCount int // number of connected http clients.
 	dev       *device.Ubiquity
+	audio     *device.Audio
 }
 
-func New(dev *device.Ubiquity) *Server {
+func New(dev *device.Ubiquity, aud *device.Audio) *Server {
 	return &Server{
-		dev: dev,
+		dev:   dev,
+		audio: aud,
 	}
 }
 
@@ -55,12 +55,12 @@ func (s *Server) Start(hostPort string, resPath string) error {
 	return http.ListenAndServeTLS(hostPort, resPath+"/server.crt", resPath+"/server.key", nil)
 }
 
-// controlSocket is the websocket server that streams rover stats.
+// controlSock handles the control messages from the http client.
 func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{}
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		glog.Warningf("failed to upgrade conn:%v", err)
+		glog.Errorf("Failed to upgrade conn:%v", err)
 		return
 	}
 
@@ -125,10 +125,9 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 			}
 		*/
 	}
-
 }
 
-// controlSock is the websocket server that streams rover stats.
+// audioSock handles audio playback from browser.
 func (s *Server) audioSock(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{}
 	c, err := upgrader.Upgrade(w, r, nil)
@@ -138,21 +137,21 @@ func (s *Server) audioSock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer c.Close()
+	/*
+		// Setup playback.
+		if err := portaudio.Initialize(); err != nil {
+			glog.Fatalf("Failed to start audio out: %v", err)
+		}
 
-	// Setup playback.
-	if err := portaudio.Initialize(); err != nil {
-		glog.Fatalf("Failed to start audio out: %v", err)
-	}
-
-	bufOut := make([]int16, 743)
-	out, err := portaudio.OpenDefaultStream(0, 1, 4000, len(bufOut), bufOut)
-	if err != nil {
-		glog.Fatalf("Failed to start audio out: %v", err)
-	}
-	if err := out.Start(); err != nil {
-		glog.Fatalf("Failed to start audio out: %v", err)
-	}
-
+		bufOut := make([]int16, 743)
+		out, err := portaudio.OpenDefaultStream(0, 1, 4000, len(bufOut), bufOut)
+		if err != nil {
+			glog.Fatalf("Failed to start audio out: %v", err)
+		}
+		if err := out.Start(); err != nil {
+			glog.Fatalf("Failed to start audio out: %v", err)
+		}
+	*/
 	for {
 
 		mt, data, err := c.ReadMessage()
@@ -165,16 +164,18 @@ func (s *Server) audioSock(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		b := bytes.NewReader(data)
-		err = binary.Read(b, binary.LittleEndian, &bufOut)
-		if err != nil {
-			glog.Errorf("%v", err)
-		}
-		glog.V(2).Infof("Got audio packet of sz:%v", len(bufOut))
+		b := bytes.NewBuffer(data)
+		s.audio.Out <- *b
 
-		if err := out.Write(); err != nil {
-			glog.Warningf("Failed to write to audio out: %v", err)
-		}
+		/*		err = binary.Read(b, binary.LittleEndian, &bufOut)
+				if err != nil {
+					glog.Errorf("%v", err)
+				}
+				glog.V(2).Infof("Got audio packet of sz:%v", len(bufOut))
+
+				if err := out.Write(); err != nil {
+					glog.Warningf("Failed to write to audio out: %v", err)
+				}*/
 
 	}
 }

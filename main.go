@@ -28,6 +28,7 @@ func main() {
 
 		enPi = flag.Bool("enable_pi", false, "Enable PI")
 	)
+
 	flag.Parse()
 	glog.Infof("Starting Ubiquity ver %s build on %s", githash, buildtime)
 
@@ -39,7 +40,10 @@ func main() {
 		}
 	}()
 
-	var motorRightBwd, motorRightFwd, motorLeftBwd, motorLeftFwd *gpio.DirectPinDriver
+	var (
+		motorRightBwd, motorRightFwd *gpio.DirectPinDriver
+		motorLeftBwd, motorLeftFwd   *gpio.DirectPinDriver
+	)
 
 	if *enPi {
 		// Initialize PI Adaptor.
@@ -48,7 +52,7 @@ func main() {
 			glog.Fatalf("Failed to initialize Adapter:%v", err)
 		}
 
-		// Initialize devices.
+		// Initialize motor devices.
 		motorRightFwd = gpio.NewDirectPinDriver(pi, *mrfwd)
 		if err := motorRightFwd.Start(); err != nil {
 			glog.Fatalf("Failed to setup GPIO: %v", err)
@@ -70,10 +74,17 @@ func main() {
 		}
 	}
 
+	// Initialize new Ubiquity Device.
 	dev := device.New(motorRightFwd, motorRightBwd, motorLeftFwd, motorLeftBwd)
 
+	// Initialize audio device.
+	aud := device.NewAudio()
+	if err := aud.Init(1024, 743, 8000); err != nil {
+		glog.Fatalf("Unable to initialize audio:%v", err)
+	}
+
 	// Startup HTTP service.
-	h := httphandler.New(dev)
+	h := httphandler.New(dev, aud)
 	if err := h.Start(*httpHostPort, *res); err != nil {
 		glog.Fatalf("Failed to start HTTP: %v", err)
 	}

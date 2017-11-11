@@ -1,9 +1,8 @@
 package device
 
 import (
+	"fmt"
 	"time"
-
-	"github.com/golang/glog"
 
 	"gobot.io/x/gobot/drivers/gpio"
 )
@@ -36,7 +35,13 @@ func New(
 	}
 }
 
+// AllMotorStop stops all motors.
 func (s *Ubiquity) AllMotorStop() error {
+	if s.motorRightFwd == nil || s.motorRightBwd == nil ||
+		s.motorLeftFwd == nil || s.motorLeftBwd == nil {
+		return fmt.Errorf("motors not initialized")
+	}
+
 	if err := s.motorLeftBwd.DigitalWrite(0); err != nil {
 		return err
 	}
@@ -58,22 +63,45 @@ func (s *Ubiquity) AllMotorStop() error {
 // dir 0 = fwd, 1 = bwd, 2 = left, 3 = right
 func (s *Ubiquity) MotorControl(dir int, dur time.Duration) error {
 
-	switch dir {
-	case 0:
-		s.motorRightFwd.DigitalWrite(1)
-		s.motorLeftFwd.DigitalWrite(1)
-	case 1:
-		s.motorRightBwd.DigitalWrite(1)
-		s.motorLeftBwd.DigitalWrite(1)
-	case 2:
-		s.motorLeftFwd.DigitalWrite(1)
-		s.motorRightBwd.DigitalWrite(1)
-	case 3:
-		s.motorRightFwd.DigitalWrite(1)
-		s.motorLeftBwd.DigitalWrite(1)
+	if s.motorRightFwd == nil || s.motorRightBwd == nil ||
+		s.motorLeftFwd == nil || s.motorLeftBwd == nil {
+		return fmt.Errorf("motors not initialized")
 	}
 
-	glog.Infof("got %v", dur)
+	switch dir {
+	case DRIVE_FWD:
+		if err := s.motorRightFwd.DigitalWrite(1); err != nil {
+			return err
+		}
+		if err := s.motorLeftFwd.DigitalWrite(1); err != nil {
+			return err
+		}
+
+	case DRIVE_BWD:
+		if err := s.motorRightBwd.DigitalWrite(1); err != nil {
+			return err
+		}
+		if err := s.motorLeftBwd.DigitalWrite(1); err != nil {
+			return err
+		}
+
+	case DRIVE_LEFT:
+		if err := s.motorLeftFwd.DigitalWrite(1); err != nil {
+			return err
+		}
+		if err := s.motorRightBwd.DigitalWrite(1); err != nil {
+			return err
+		}
+
+	case DRIVE_RIGHT:
+		if err := s.motorRightFwd.DigitalWrite(1); err != nil {
+			return err
+		}
+		if err := s.motorLeftBwd.DigitalWrite(1); err != nil {
+			return err
+		}
+	}
+
 	time.Sleep(dur * time.Millisecond)
 	return s.AllMotorStop()
 }
