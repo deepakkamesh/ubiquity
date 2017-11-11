@@ -3,6 +3,7 @@ package device
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"time"
 
 	"github.com/golang/glog"
@@ -29,26 +30,27 @@ func NewAudio() *Audio {
 	}
 }
 
+// oBufLen is 8 bits while bufOut is 16 bits.
 func (s *Audio) Init(inBufLen, oBufLen int, sampleRate float64) error {
 	if err := portaudio.Initialize(); err != nil {
-		return err
+		return fmt.Errorf("init failed:%v", err)
 	}
 
 	// Open Input stream.
-	bufIn := make([]int16, inBufLen)
-	in, err := portaudio.OpenDefaultStream(1, 0, sampleRate, len(bufIn), bufIn)
-	if err != nil {
-		return err
-	}
+	/*	bufIn := make([]int16, inBufLen)
+			in, err := portaudio.OpenDefaultStream(1, 0, sampleRate, len(bufIn), bufIn)
+			if err != nil {
+				return fmt.Errorf("failed to open input stream:%v", err)
+			}
 
-	s.streamIn = in
-	s.bufIn = bufIn
-
+		s.streamIn = in
+		s.bufIn = bufIn
+	*/
 	// Open Output stream.
 	bufOut := make([]int16, oBufLen)
 	out, err := portaudio.OpenDefaultStream(0, 1, sampleRate, len(bufOut), bufOut)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open output stream:%v", err)
 	}
 
 	s.streamOut = out
@@ -139,7 +141,6 @@ func (s *Audio) playback() {
 			if err := s.streamOut.Write(); err != nil {
 				glog.Warningf("Failed to write to audio out: %v", err)
 			}
-
 		}
 	}
 }
