@@ -137,21 +137,7 @@ func (s *Server) audioSock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer c.Close()
-	/*
-		// Setup playback.
-		if err := portaudio.Initialize(); err != nil {
-			glog.Fatalf("Failed to start audio out: %v", err)
-		}
 
-		bufOut := make([]int16, 743)
-		out, err := portaudio.OpenDefaultStream(0, 1, 4000, len(bufOut), bufOut)
-		if err != nil {
-			glog.Fatalf("Failed to start audio out: %v", err)
-		}
-		if err := out.Start(); err != nil {
-			glog.Fatalf("Failed to start audio out: %v", err)
-		}
-	*/
 	for {
 
 		mt, data, err := c.ReadMessage()
@@ -166,16 +152,6 @@ func (s *Server) audioSock(w http.ResponseWriter, r *http.Request) {
 
 		b := bytes.NewBuffer(data)
 		s.audio.Out <- *b
-
-		/*		err = binary.Read(b, binary.LittleEndian, &bufOut)
-				if err != nil {
-					glog.Errorf("%v", err)
-				}
-				glog.V(2).Infof("Got audio packet of sz:%v", len(bufOut))
-
-				if err := out.Write(); err != nil {
-					glog.Warningf("Failed to write to audio out: %v", err)
-				}*/
 
 	}
 }

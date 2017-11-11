@@ -79,9 +79,10 @@ func main() {
 
 	// Initialize audio device.
 	aud := device.NewAudio()
-	if err := aud.Init(1024, 743, 8000); err != nil {
+	if err := aud.Init(1024, 743, 4000); err != nil {
 		glog.Fatalf("Unable to initialize audio:%v", err)
 	}
+	aud.StartPlayback()
 
 	// Startup HTTP service.
 	h := httphandler.New(dev, aud)
