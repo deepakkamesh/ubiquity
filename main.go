@@ -74,7 +74,8 @@ func main() {
 			glog.Fatalf("Failed to setup GPIO: %v", err)
 		}
 
-		servo = device.NewServo(20000, "16", pi)
+		servo = device.NewServo(20000, "23", pi)
+		servo.SetAngle(90)
 	}
 
 	// Initialize new Ubiquity Device.

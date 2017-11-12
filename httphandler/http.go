@@ -118,18 +118,18 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 			s.servoStep = int(msg.Data.(float64))
 
 		case SERVO_UP:
-			if err := s.dev.Servo.SetAngle(s.servoAngle + s.servoStep); err != nil {
-				sendError(err.Error(), c)
-				continue
-			}
-			s.servoAngle += s.servoStep
-
-		case SERVO_DOWN:
 			if err := s.dev.Servo.SetAngle(s.servoAngle - s.servoStep); err != nil {
 				sendError(err.Error(), c)
 				continue
 			}
 			s.servoAngle -= s.servoStep
+
+		case SERVO_DOWN:
+			if err := s.dev.Servo.SetAngle(s.servoAngle + s.servoStep); err != nil {
+				sendError(err.Error(), c)
+				continue
+			}
+			s.servoAngle += s.servoStep
 
 		case AUDIO_START:
 		}

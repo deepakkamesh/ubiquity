@@ -17,6 +17,7 @@ type Servo struct {
 	adaptor   gobot.Adaptor
 }
 
+// NewServo returns a new servo. note: pin is the BCMxx number not actual number.
 func NewServo(piBlasterPeriod uint32, pin string, a gobot.Adaptor) *Servo {
 	return &Servo{
 		pin:       pin,
@@ -45,15 +46,14 @@ func (p *Servo) SetAngle(angle int) error {
 
 // SetDutyCycle sets the duty cycle of the PWM.
 func (p *Servo) SetDutyCycle(duty uint32) error {
-	if duty > 20000 { //p.pwmPeriod {
+	if duty > p.pwmPeriod {
 		return errors.New("Duty cycle exceeds period.")
 	}
 
 	val := gobot.FromScale(float64(duty), 0, float64(p.pwmPeriod))
 
 	glog.V(2).Infof("Setting PWM duty cycle:%v, period:%v, piBlasterDuty:%v pin:%v", duty, p.pwmPeriod, val, p.pin)
-	return nil
-	//TODO:remove comment	return p.piBlaster(fmt.Sprintf("%v=%v\n", p.pin, val))
+	return p.piBlaster(fmt.Sprintf("%v=%v\n", p.pin, val))
 }
 
 func (p *Servo) piBlaster(data string) (err error) {
