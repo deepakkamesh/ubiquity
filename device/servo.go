@@ -36,13 +36,16 @@ func (p *Servo) SetAngle(angle int) error {
 		return fmt.Errorf("Angle needs to be 0 to 180, got %v", angle)
 	}
 
-	glog.V(2).Infof("Setting angle %v", angle)
+	val := 500 + 1500*angle/180
+
+	glog.V(2).Infof("Setting angle:%v -> duty cycle:%v microsecs ", angle, val)
+	p.SetDutyCycle(uint32(val))
 	return nil
 }
 
 // SetDutyCycle sets the duty cycle of the PWM.
 func (p *Servo) SetDutyCycle(duty uint32) error {
-	if duty > p.pwmPeriod {
+	if duty > 20000 { //p.pwmPeriod {
 		return errors.New("Duty cycle exceeds period.")
 	}
 
