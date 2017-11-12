@@ -1,3 +1,5 @@
+/// +build ignore
+
 package device
 
 import (
@@ -37,15 +39,15 @@ func (s *Audio) Init(inBufLen, oBufLen int, sampleRate float64) error {
 	}
 
 	// Open Input stream.
-	/*	bufIn := make([]int16, inBufLen)
-			in, err := portaudio.OpenDefaultStream(1, 0, sampleRate, len(bufIn), bufIn)
-			if err != nil {
-				return fmt.Errorf("failed to open input stream:%v", err)
-			}
+	bufIn := make([]int16, inBufLen)
+	in, err := portaudio.OpenDefaultStream(1, 0, sampleRate, len(bufIn), bufIn)
+	if err != nil {
+		return fmt.Errorf("failed to open input stream:%v", err)
+	}
 
-		s.streamIn = in
-		s.bufIn = bufIn
-	*/
+	s.streamIn = in
+	s.bufIn = bufIn
+
 	// Open Output stream.
 	bufOut := make([]int16, oBufLen)
 	out, err := portaudio.OpenDefaultStream(0, 1, sampleRate, len(bufOut), bufOut)

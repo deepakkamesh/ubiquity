@@ -160,26 +160,38 @@ func (s *Server) audioSock(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{}
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		glog.Warningf("failed to upgrade conn:%v", err)
+		glog.Errorf("failed to upgrade conn:%v", err)
 		return
 	}
-
 	defer c.Close()
 
+	// Playback audio.
+	go func() {
+		for {
+			mt, data, err := c.ReadMessage()
+			if err != nil {
+				glog.Warningf("Websocket read error: %v", err)
+				return
+			}
+			if mt != 2 {
+				glog.Errorf("Audio packet should be binary. Instead got text message type.")
+				return
+			}
+
+			b := bytes.NewBuffer(data)
+			s.audio.Out <- *b
+		}
+	}()
+
+	// Send audio packets to browser.
+
 	for {
-
-		mt, data, err := c.ReadMessage()
-		if err != nil {
-			glog.Errorf("Websocket read error: %v", err)
+		audData := <-s.audio.In
+		_ = audData
+		if err := c.WriteMessage(websocket.BinaryMessage, audData.Bytes()); err != nil {
+			glog.Warningf("Websocket write error:%v", err)
 			return
 		}
-		if mt != 2 {
-			glog.Errorf("Audio packet should be binary. Instead got text message type.")
-			return
-		}
-
-		b := bytes.NewBuffer(data)
-		s.audio.Out <- *b
-
 	}
+
 }

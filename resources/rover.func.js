@@ -134,6 +134,7 @@ $(document).ready(function() {
 $(document).ready(function() {
 
     ws = new WebSocket("wss://" + window.location.host + "/audiostream");
+    ws.binaryType = 'arraybuffer';
 
     ws.onerror = function(evt) {
         print("ERROR: " + evt.data);
@@ -178,6 +179,17 @@ $(document).ready(function() {
             return output;
         } */
 
+    function int16ToFloat32(inputArray, startIndex, length) {
+        var output = new Float32Array(inputArray.length - startIndex);
+        for (var i = startIndex; i < length; i++) {
+            var int = inputArray[i];
+            // If the high bit is on, then it is a negative number, and actually counts backwards.
+            var float = (int >= 0x8000) ? -(0x10000 - int) / 0x8000 : int / 0x7FFF;
+            output[i] = float;
+        }
+        return output;
+    }
+
     // Audio stream handling.
     var streamControl;
     var handleSuccess = function(stream) {
@@ -192,10 +204,8 @@ $(document).ready(function() {
             if (!streamControl) {
                 return;
             }
-
             var ib = e.inputBuffer;
             var i = ib.getChannelData(0);
-            //var conv = floatTo16Bit(i, 0);
             var conv = downsampleBuffer(i, 44100, 4000);
             // console.log(conv)
             ws.send(conv);
@@ -207,25 +217,42 @@ $(document).ready(function() {
         })
         .then(handleSuccess);
 
+    // Recieve and process audio packets from Ubiquity.
 
+    var context = new window.AudioContext()
+    var channels = 1
+    var sampleRate = 4000
+    var frames = 1024
+    var buffer = context.createBuffer(channels, frames, sampleRate)
+
+    ws.onmessage = function(evt) {
+        var data = new Int16Array(evt.data);
+        var floatData = int16ToFloat32(data, 0, data.length)
+        buffer.getChannelData(0).set(floatData)
+
+        var source = context.createBufferSource()
+        source.buffer = buffer
+        // Then output to speaker for example
+        source.connect(context.destination)
+        source.start(0)
+    }
 
     var recordAudioBtn = document.querySelector('#record_audio');
     recordAudioBtn.addEventListener('mousedown', function() {
         streamControl = true;
-        console.log("started");
+        console.log("Rec. started");
     });
     recordAudioBtn.addEventListener('touchstart', function() {
         streamControl = true;
-        console.log("started");
+        console.log("Rec. started");
     });
-
     recordAudioBtn.addEventListener('mouseup', function() {
         streamControl = false;
-        console.log("stop");
+        console.log("Rec. stopped");
     });
     recordAudioBtn.addEventListener('touchend', function() {
         streamControl = false;
-        console.log("stop");
+        console.log("Rec. stopped");
     });
 
 });

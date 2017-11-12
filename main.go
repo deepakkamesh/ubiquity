@@ -87,6 +87,7 @@ func main() {
 		glog.Fatalf("Unable to initialize audio:%v", err)
 	}
 	aud.StartPlayback()
+	aud.StartListen()
 
 	// Startup HTTP service.
 	h := httphandler.New(dev, aud)
