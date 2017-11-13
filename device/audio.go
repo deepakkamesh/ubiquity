@@ -25,8 +25,8 @@ type Audio struct {
 
 func NewAudio() *Audio {
 	return &Audio{
-		In:           make(chan bytes.Buffer, 10),
-		Out:          make(chan bytes.Buffer, 1000),
+		In:           make(chan bytes.Buffer),
+		Out:          make(chan bytes.Buffer, 100),
 		listenStop:   make(chan struct{}),
 		playbackStop: make(chan struct{}),
 	}
@@ -80,18 +80,18 @@ func (s *Audio) StopListen() {
 // ResetPlayback resets the output stream (stop, start).
 // Some hardware seems to need a reset between playback.
 func (s *Audio) ResetPlayback() {
-	s.StopPlayback()
+	if err := s.streamOut.Stop(); err != nil {
+		glog.Errorf("Error stopping stream:%v", err)
+	}
 	time.Sleep(50 * time.Millisecond)
-	s.StartPlayback()
+	if err := s.streamOut.Start(); err != nil {
+		glog.Errorf("Error starting stream:%v", err)
+	}
 }
 
 func (s *Audio) listen() {
+	glog.Info("Started capturing audio from mic")
 
-	// TODO: Get a cleaner solution to by removing the buffered channel and
-	// handling the race condition. Write to s.In in a go func.
-	if len(s.In) > 0 {
-		glog.Warningf("Audio input channel is non zero: %v", len(s.In))
-	}
 	if err := s.streamIn.Start(); err != nil {
 		glog.Fatalf("Failed to start input stream: %v ", err)
 	}
@@ -113,6 +113,7 @@ func (s *Audio) listen() {
 			if err := s.streamIn.Stop(); err != nil {
 				glog.Errorf("Failed to stop input audio stream: %v", err)
 			}
+			glog.Info("Stopped capturing audio from mic")
 			return
 
 		default:
@@ -122,6 +123,8 @@ func (s *Audio) listen() {
 }
 
 func (s *Audio) playback() {
+
+	glog.Info("Started playback audio from browser")
 
 	if err := s.streamOut.Start(); err != nil {
 		glog.Fatalf("Failed to start audio out: %v", err)
@@ -133,6 +136,7 @@ func (s *Audio) playback() {
 			if err := s.streamOut.Stop(); err != nil {
 				glog.Errorf("Failed to stop output audio stream: %v", err)
 			}
+			glog.Info("Stopped playback audio from browser")
 			return
 
 		case out := <-s.Out:

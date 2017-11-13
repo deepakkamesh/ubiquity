@@ -46,16 +46,14 @@ $(document).ready(function() {
         print("Control ERROR: " + evt.data);
     }
 
-   SendControlCmd =  function(cmd, data) {
+    SendControlCmd = function(cmd, data) {
         cmdJS = JSON.stringify({
-        CmdType: cmd,
-        Data: data,
-    });
-    console.log(cmdJS);
-    wsCtrl.send(cmdJS);
+            CmdType: cmd,
+            Data: data,
+        });
+        console.log(cmdJS);
+        wsCtrl.send(cmdJS);
     }
-
-
 });
 
 // Callback for keyboard keys Drive Control.
@@ -80,13 +78,7 @@ $(document).keydown(function(e) {
     if (cmd == -1) {
         return
     }
-    var cmd = JSON.stringify({
-        CmdType: cmd,
-        Data: parseInt($('#drive_velocity_sel').val()),
-    });
-    console.log(cmd);
-
-    wsCtrl.send(cmd);
+    SendControlCmd(cmd, parseInt($('#drive_velocity_sel').val()));
 });
 
 // Servo and Drive Controls.
@@ -102,20 +94,12 @@ $(document).ready(function() {
     // Servo Controls.
     var servoDownButton = document.querySelector('#servo-down');
     servoDownButton.addEventListener('click', function() {
-        var cmd = JSON.stringify({
-            CmdType: CmdType.SERVO_DOWN,
-        });
-        console.log(cmd);
-        wsCtrl.send(cmd);
+        SendControlCmd(CmdType.SERVO_DOWN);
     });
 
     var servoUpButton = document.querySelector('#servo-up');
     servoUpButton.addEventListener('click', function() {
-        var cmd = JSON.stringify({
-            CmdType: CmdType.SERVO_UP,
-        });
-        console.log(cmd);
-        wsCtrl.send(cmd);
+        SendControlCmd(CmdType.SERVO_UP);
     });
 
     // TODO: Change to center and max or something.
@@ -132,12 +116,7 @@ $(document).ready(function() {
         $("#servo_angle_step_disp").empty();
         $("#servo_angle_step_disp").append(val);
 
-        var cmd = JSON.stringify({
-            CmdType: CmdType.SERVO_STEP,
-            Data: parseInt(val),
-        });
-        console.log(cmd);
-        wsCtrl.send(cmd);
+        SendControlCmd(CmdType.SERVO_STEP, parseInt(val));
     });
 });
 
@@ -201,7 +180,7 @@ $(document).ready(function() {
         return output;
     }
 
-    // Audio stream handling.
+    // Send audio packets from browser to Ubiquity.
     var streamControl;
     var handleSuccess = function(stream) {
         var context = new AudioContext();
@@ -218,7 +197,7 @@ $(document).ready(function() {
             var ib = e.inputBuffer;
             var i = ib.getChannelData(0);
             var conv = downsampleBuffer(i, 44100, 4000);
-            console.log(conv)
+            //console.log(conv)
             ws.send(conv);
         };
     };
@@ -228,11 +207,11 @@ $(document).ready(function() {
         })
         .then(handleSuccess);
 
-    // Recieve and process audio packets from Ubiquity.
+    // Recieve and play audio packets from Ubiquity.
     var context = new window.AudioContext()
     var channels = 1
     var sampleRate = 8000
-    var frames = 1024 
+    var frames = 1024
     var buffer = context.createBuffer(channels, frames, sampleRate)
 
     ws.onmessage = function(evt) {
@@ -250,7 +229,7 @@ $(document).ready(function() {
     var recordAudioBtn = document.querySelector('#record_audio');
     recordAudioBtn.addEventListener('mousedown', function() {
         streamControl = true;
-        SendControlCmd(CmdType.AUDIO_START,'');
+        SendControlCmd(CmdType.AUDIO_START, '');
         console.log("Rec. started");
     });
     recordAudioBtn.addEventListener('touchstart', function() {
@@ -259,7 +238,7 @@ $(document).ready(function() {
     });
     recordAudioBtn.addEventListener('mouseup', function() {
         streamControl = false;
-        SendControlCmd(CmdType.AUDIO_STOP,'');
+        SendControlCmd(CmdType.AUDIO_STOP, '');
         console.log("Rec. stopped");
     });
     recordAudioBtn.addEventListener('touchend', function() {

@@ -26,7 +26,7 @@ func main() {
 		mrfwd        = flag.String("right_motor_fwd_pin", "13", "Motor controller")
 		mrbwd        = flag.String("right_motor_bwd_pin", "15", "Motor controller")
 
-		enPi = flag.Bool("enable_pi", false, "Enable PI")
+		enPi = flag.Bool("enable_pi", false, "Enable PI Hardware (motors, servo)")
 	)
 
 	flag.Parse()
@@ -74,6 +74,7 @@ func main() {
 			glog.Fatalf("Failed to setup GPIO: %v", err)
 		}
 
+		// Initialize Servo.
 		servo = device.NewServo(20000, "23", pi)
 		servo.SetAngle(90)
 	}

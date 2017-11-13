@@ -26,6 +26,8 @@ const (
 	SERVO_STEP
 )
 
+const ()
+
 // Control Message.
 type ControlMsg struct {
 	CmdType int
@@ -143,7 +145,7 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// sendError sends an error packet to the browser.
+// sendError sends an error packet on control socket to the browser.
 func sendError(errorString string, c *websocket.Conn) {
 	msg := ControlMsg{
 		CmdType: ERR,
@@ -171,7 +173,7 @@ func (s *Server) audioSock(w http.ResponseWriter, r *http.Request) {
 	}
 	defer c.Close()
 
-	// Playback audio.
+	// Playback audio from browser.
 	go func() {
 		for {
 			mt, data, err := c.ReadMessage()
@@ -190,10 +192,8 @@ func (s *Server) audioSock(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	// Send audio packets to browser.
-
 	for {
 		audData := <-s.audio.In
-		_ = audData
 		if err := c.WriteMessage(websocket.BinaryMessage, audData.Bytes()); err != nil {
 			glog.Warningf("Websocket write error:%v", err)
 			return
