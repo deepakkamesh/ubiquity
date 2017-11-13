@@ -33,14 +33,14 @@ func NewAudio() *Audio {
 }
 
 // oBufLen is 8 bits while bufOut is 16 bits.
-func (s *Audio) Init(inBufLen, oBufLen int, sampleRate float64) error {
+func (s *Audio) Init(inBufLen, oBufLen int, inSampleRate, outSampleRate float64) error {
 	if err := portaudio.Initialize(); err != nil {
 		return fmt.Errorf("init failed:%v", err)
 	}
 
 	// Open Input stream.
 	bufIn := make([]int16, inBufLen)
-	in, err := portaudio.OpenDefaultStream(1, 0, sampleRate, len(bufIn), bufIn)
+	in, err := portaudio.OpenDefaultStream(1, 0, inSampleRate, len(bufIn), bufIn)
 	if err != nil {
 		return fmt.Errorf("failed to open input stream:%v", err)
 	}
@@ -50,7 +50,7 @@ func (s *Audio) Init(inBufLen, oBufLen int, sampleRate float64) error {
 
 	// Open Output stream.
 	bufOut := make([]int16, oBufLen)
-	out, err := portaudio.OpenDefaultStream(0, 1, sampleRate, len(bufOut), bufOut)
+	out, err := portaudio.OpenDefaultStream(0, 1, outSampleRate, len(bufOut), bufOut)
 	if err != nil {
 		return fmt.Errorf("failed to open output stream:%v", err)
 	}
@@ -104,6 +104,7 @@ func (s *Audio) listen() {
 		var bufWriter bytes.Buffer
 		binary.Write(&bufWriter, binary.LittleEndian, s.bufIn)
 		s.In <- bufWriter
+		glog.V(2).Infof("Recorded audio chunk size: %v", bufWriter.Len())
 	}
 
 	for {

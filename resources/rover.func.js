@@ -45,6 +45,17 @@ $(document).ready(function() {
     wsCtrl.onerror = function(evt) {
         print("Control ERROR: " + evt.data);
     }
+
+   SendControlCmd =  function(cmd, data) {
+        cmdJS = JSON.stringify({
+        CmdType: cmd,
+        Data: data,
+    });
+    console.log(cmdJS);
+    wsCtrl.send(cmdJS);
+    }
+
+
 });
 
 // Callback for keyboard keys Drive Control.
@@ -195,7 +206,7 @@ $(document).ready(function() {
     var handleSuccess = function(stream) {
         var context = new AudioContext();
         var source = context.createMediaStreamSource(stream);
-        var processor = context.createScriptProcessor(8192, 1, 1);
+        var processor = context.createScriptProcessor(2048, 1, 1);
 
         source.connect(processor);
         processor.connect(context.destination);
@@ -207,7 +218,7 @@ $(document).ready(function() {
             var ib = e.inputBuffer;
             var i = ib.getChannelData(0);
             var conv = downsampleBuffer(i, 44100, 4000);
-            // console.log(conv)
+            console.log(conv)
             ws.send(conv);
         };
     };
@@ -218,11 +229,10 @@ $(document).ready(function() {
         .then(handleSuccess);
 
     // Recieve and process audio packets from Ubiquity.
-
     var context = new window.AudioContext()
     var channels = 1
-    var sampleRate = 4000
-    var frames = 1024
+    var sampleRate = 8000
+    var frames = 1024 
     var buffer = context.createBuffer(channels, frames, sampleRate)
 
     ws.onmessage = function(evt) {
@@ -240,6 +250,7 @@ $(document).ready(function() {
     var recordAudioBtn = document.querySelector('#record_audio');
     recordAudioBtn.addEventListener('mousedown', function() {
         streamControl = true;
+        SendControlCmd(CmdType.AUDIO_START,'');
         console.log("Rec. started");
     });
     recordAudioBtn.addEventListener('touchstart', function() {
@@ -248,6 +259,7 @@ $(document).ready(function() {
     });
     recordAudioBtn.addEventListener('mouseup', function() {
         streamControl = false;
+        SendControlCmd(CmdType.AUDIO_STOP,'');
         console.log("Rec. stopped");
     });
     recordAudioBtn.addEventListener('touchend', function() {
