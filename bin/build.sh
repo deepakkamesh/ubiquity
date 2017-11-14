@@ -26,7 +26,7 @@ fi
 if [ "$3" != "res" ]; then 
 	if [ $1 == "arm" ]; then
 		echo "Compiling for ARM $BUILDTIME $GITHASH"
-   GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc \
+   GOOS=linux GOARCH=arm GOARM=6 CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc \
    CGO_LDFLAGS="-L/home/dkg/arm-lib -Wl,-rpath,/home/dkg/arm-lib" \
    $GOROOT/bin/go build -ldflags "$VER" -o $LOC/main $LOC/../main.go
 
