@@ -32,6 +32,8 @@ func NewAudio() *Audio {
 	}
 }
 
+// Init initializes the audio. If BufLen is set to zero it does not init the corresponding
+// inp or out.
 // oBufLen is 8 bits while bufOut is 16 bits.
 func (s *Audio) Init(inBufLen, oBufLen int, inSampleRate, outSampleRate float64) error {
 	if err := portaudio.Initialize(); err != nil {
@@ -39,25 +41,28 @@ func (s *Audio) Init(inBufLen, oBufLen int, inSampleRate, outSampleRate float64)
 	}
 
 	// Open Input stream.
-	bufIn := make([]int16, inBufLen)
-	in, err := portaudio.OpenDefaultStream(1, 0, inSampleRate, len(bufIn), bufIn)
-	if err != nil {
-		return fmt.Errorf("failed to open input stream:%v", err)
-	}
+	if inBufLen > 0 {
+		bufIn := make([]int16, inBufLen)
+		in, err := portaudio.OpenDefaultStream(1, 0, inSampleRate, len(bufIn), bufIn)
+		if err != nil {
+			return fmt.Errorf("failed to open input stream:%v", err)
+		}
 
-	s.streamIn = in
-	s.bufIn = bufIn
+		s.streamIn = in
+		s.bufIn = bufIn
+	}
 
 	// Open Output stream.
-	bufOut := make([]int16, oBufLen)
-	out, err := portaudio.OpenDefaultStream(0, 1, outSampleRate, len(bufOut), bufOut)
-	if err != nil {
-		return fmt.Errorf("failed to open output stream:%v", err)
+	if oBufLen > 0 {
+		bufOut := make([]int16, oBufLen)
+		out, err := portaudio.OpenDefaultStream(0, 1, outSampleRate, len(bufOut), bufOut)
+		if err != nil {
+			return fmt.Errorf("failed to open output stream:%v", err)
+		}
+
+		s.streamOut = out
+		s.bufOut = bufOut
 	}
-
-	s.streamOut = out
-	s.bufOut = bufOut
-
 	return nil
 }
 
@@ -80,13 +85,9 @@ func (s *Audio) StopListen() {
 // ResetPlayback resets the output stream (stop, start).
 // Some hardware seems to need a reset between playback.
 func (s *Audio) ResetPlayback() {
-	if err := s.streamOut.Stop(); err != nil {
-		glog.Errorf("Error stopping stream:%v", err)
-	}
-	time.Sleep(50 * time.Millisecond)
-	if err := s.streamOut.Start(); err != nil {
-		glog.Errorf("Error starting stream:%v", err)
-	}
+	s.streamOut.Abort()
+	time.Sleep(1000 * time.Millisecond)
+	s.streamOut.Start()
 }
 
 func (s *Audio) listen() {
@@ -133,7 +134,7 @@ func (s *Audio) playback() {
 	for {
 		select {
 		case <-s.playbackStop:
-			if err := s.streamOut.Stop(); err != nil {
+			if err := s.streamOut.Abort(); err != nil {
 				glog.Errorf("Failed to stop output audio stream: %v", err)
 			}
 			glog.Info("Stopped playback audio from browser")

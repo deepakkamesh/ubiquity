@@ -134,11 +134,11 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 			s.servoAngle += s.servoStep
 
 		case AUDIO_START:
-			s.audio.StopListen()
+			//s.audio.StopListen()
 
 		case AUDIO_STOP:
-			s.audio.StartListen()
-			s.audio.ResetPlayback()
+			//s.audio.StartListen()
+			//	s.audio.ResetPlayback()
 
 		}
 
