@@ -17,10 +17,15 @@ GITHASH="`git -C $LOC rev-parse --short=7 HEAD`"
 VER="-X main.buildtime=$BUILDTIME -X main.githash=$GITHASH"
 
 if [ $# -lt 1 ]; then
-	echo "build.sh < arm | noarm > < ip address > <all | res | bin >"
+	echo "build.sh < arm | noarm | src> < ip address > <all | res | bin >"
 	exit
 fi
 
+if [ "$1" == "src" ]; then
+  	echo "Pushing source to machine $2"
+		rsync -avz -e "ssh -o StrictHostKeyChecking=no" --progress ../  $2:~/Projects/ubiquity
+		exit 0
+fi
 
 # Compile binary if not res only.
 if [ "$3" != "res" ]; then 

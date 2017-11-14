@@ -84,7 +84,7 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 	for {
 		_, data, err := c.ReadMessage()
 		if err != nil {
-			glog.Errorf("Websocket read error: %v", err)
+			glog.Errorf("Control websocket read error: %v", err)
 			return
 		}
 		var msg ControlMsg
@@ -134,11 +134,12 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 			s.servoAngle += s.servoStep
 
 		case AUDIO_START:
-			//s.audio.StopListen()
+			s.audio.StopRec()
+			s.audio.StartPlayback()
 
 		case AUDIO_STOP:
-			//s.audio.StartListen()
-			//	s.audio.ResetPlayback()
+			s.audio.StopPlayback()
+			s.audio.StartRec()
 
 		}
 
@@ -176,16 +177,11 @@ func (s *Server) audioSock(w http.ResponseWriter, r *http.Request) {
 	// Playback audio from browser.
 	go func() {
 		for {
-			mt, data, err := c.ReadMessage()
+			_, data, err := c.ReadMessage()
 			if err != nil {
-				glog.Warningf("Websocket read error: %v", err)
+				glog.Errorf("Audio websocket read error: %v", err)
 				return
 			}
-			if mt != 2 {
-				glog.Errorf("Audio packet should be binary. Instead got text message type.")
-				return
-			}
-
 			b := bytes.NewBuffer(data)
 			s.audio.Out <- *b
 		}
