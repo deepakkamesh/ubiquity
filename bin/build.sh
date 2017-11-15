@@ -27,12 +27,16 @@ if [ "$1" == "src" ]; then
 		exit 0
 fi
 
+# Path to Raspberry pi compile tools from https://github.com/raspberrypi/tools
+CCHOME=/home/dkg/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin
+
 # Compile binary if not res only.
 if [ "$3" != "res" ]; then 
 	if [ $1 == "arm" ]; then
 		echo "Compiling for ARM $BUILDTIME $GITHASH"
-   GOOS=linux GOARCH=arm GOARM=6 CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc \
+   GOOS=linux GOARCH=arm GOARM=6 CGO_ENABLED=1 CC="$CCHOME/arm-linux-gnueabihf-gcc" \
    CGO_LDFLAGS="-L/home/dkg/arm-lib -Wl,-rpath,/home/dkg/arm-lib" \
+   PKG_CONFIG_PATH=/home/dkg/arm-lib \
    $GOROOT/bin/go build -ldflags "$VER" -o $LOC/main $LOC/../main.go
 
 	else
