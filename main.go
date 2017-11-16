@@ -89,8 +89,15 @@ func main() {
 	}
 	aud.StartRec()
 
+	// Initialize video device.
+	vid := device.NewVideo(device.MJPEG, 640, 480, 10)
+	if err := vid.Init(); err != nil {
+		glog.Fatalf("Unable to initialize video:%v", err)
+	}
+	vid.StartVideoStream()
+
 	// Startup HTTP service.
-	h := httphandler.New(dev, aud)
+	h := httphandler.New(dev, aud, vid)
 	if err := h.Start(*httpHostPort, *res); err != nil {
 		glog.Fatalf("Failed to start HTTP: %v", err)
 	}

@@ -37,16 +37,18 @@ type ControlMsg struct {
 type Server struct {
 	dev   *device.Ubiquity
 	audio *device.Audio
+	video *device.Video
 
 	connCount  int // number of connected http clients.
 	servoStep  int // Servo step for each click.
 	servoAngle int // Current Angle for servo.
 }
 
-func New(dev *device.Ubiquity, aud *device.Audio) *Server {
+func New(dev *device.Ubiquity, aud *device.Audio, vid *device.Video) *Server {
 	return &Server{
 		dev:        dev,
 		audio:      aud,
+		video:      vid,
 		servoAngle: 90,
 		servoStep:  30,
 	}
@@ -57,6 +59,7 @@ func (s *Server) Start(hostPort string, resPath string) error {
 	// http routers.
 	http.HandleFunc("/audiostream", s.audioSock)
 	http.HandleFunc("/control", s.controlSock)
+	http.Handle("/videostream", s.video.Stream)
 
 	// Serve static content from resources dir.
 	fs := http.FileServer(http.Dir(resPath))
