@@ -28,11 +28,17 @@ func NewServo(piBlasterPeriod uint32, pin string, a gobot.Adaptor) *Servo {
 
 // Unexport unexports the pin and releases the pin from the operating system
 func (p *Servo) Unexport() error {
-	return p.piBlaster(fmt.Sprintf("release %v\n", p.pin))
+	if p == nil {
+		return errors.New("servo not initialized")
+	}
+	return piBlaster(fmt.Sprintf("release %v\n", p.pin))
 }
 
 // SetAngle moves the servo to the appropriate angle.
 func (p *Servo) SetAngle(angle int) error {
+	if p == nil {
+		return errors.New("servo not initialized")
+	}
 	if angle < 0 || angle > 180 {
 		return fmt.Errorf("Angle needs to be 0 to 180, got %v", angle)
 	}
@@ -46,6 +52,9 @@ func (p *Servo) SetAngle(angle int) error {
 
 // SetDutyCycle sets the duty cycle of the PWM.
 func (p *Servo) SetDutyCycle(duty uint32) error {
+	if p == nil {
+		return errors.New("servo not initialized")
+	}
 	if duty > p.pwmPeriod {
 		return errors.New("Duty cycle exceeds period.")
 	}
@@ -53,10 +62,10 @@ func (p *Servo) SetDutyCycle(duty uint32) error {
 	val := gobot.FromScale(float64(duty), 0, float64(p.pwmPeriod))
 
 	glog.V(2).Infof("Setting PWM duty cycle:%v, period:%v, piBlasterDuty:%v pin:%v", duty, p.pwmPeriod, val, p.pin)
-	return p.piBlaster(fmt.Sprintf("%v=%v\n", p.pin, val))
+	return piBlaster(fmt.Sprintf("%v=%v\n", p.pin, val))
 }
 
-func (p *Servo) piBlaster(data string) (err error) {
+func piBlaster(data string) (err error) {
 	fi, err := sysfs.OpenFile("/dev/pi-blaster", os.O_WRONLY|os.O_APPEND, 0644)
 	defer fi.Close()
 
