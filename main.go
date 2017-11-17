@@ -26,6 +26,9 @@ func main() {
 		mrfwd        = flag.String("right_motor_fwd_pin", "13", "Motor controller")
 		mrbwd        = flag.String("right_motor_bwd_pin", "15", "Motor controller")
 
+		sslCert    = flag.String("ssl_cert", "cert.pem", "The SSL certificate in resources dir")
+		sslPrivKey = flag.String("ssl_priv_key", "privkey.pem", "SSL private Keyname in resources dir")
+
 		enPi = flag.Bool("enable_pi", false, "Enable PI Hardware (motors, servo)")
 	)
 
@@ -96,7 +99,7 @@ func main() {
 
 	// Startup HTTP service.
 	h := httphandler.New(dev, aud, vid)
-	if err := h.Start(*httpHostPort, *res); err != nil {
+	if err := h.Start(*httpHostPort, *res, *sslCert, *sslPrivKey); err != nil {
 		glog.Fatalf("Failed to start HTTP: %v", err)
 	}
 }

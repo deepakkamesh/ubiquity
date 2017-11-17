@@ -266,24 +266,17 @@ $(document).ready(function() {
         source.start(0)
     }
 
-    var recordAudioBtn = document.querySelector('#record_audio');
-    recordAudioBtn.addEventListener('mousedown', function() {
-        streamControl = true;
-        SendControlCmd(CmdType.AUDIO_START, '');
-        console.log("Rec. started");
-    });
-    recordAudioBtn.addEventListener('touchstart', function() {
-        streamControl = true;
-        console.log("Rec. started");
-    });
-    recordAudioBtn.addEventListener('mouseup', function() {
-        streamControl = false;
-        SendControlCmd(CmdType.AUDIO_STOP, '');
-        console.log("Rec. stopped");
-    });
-    recordAudioBtn.addEventListener('touchend', function() {
-        streamControl = false;
-        console.log("Rec. stopped");
+ var recStart= document.querySelector('#rec-start');
+     recStart.addEventListener('click', function() {
+        if (document.getElementById('rec-start').checked) {
+          streamControl = true;
+          SendControlCmd(CmdType.AUDIO_START, '');
+          console.log("Rec. started");
+        } else {
+          streamControl = false;
+          SendControlCmd(CmdType.AUDIO_STOP, '');
+          console.log("Rec. stopped");
+        }
     });
 
 });
