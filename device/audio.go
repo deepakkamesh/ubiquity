@@ -27,7 +27,7 @@ type Audio struct {
 func NewAudio() *Audio {
 	return &Audio{
 		In:         make(chan bytes.Buffer),
-		Out:        make(chan bytes.Buffer, 100),
+		Out:        make(chan bytes.Buffer),
 		recStop:    make(chan struct{}),
 		playStop:   make(chan struct{}),
 		playStatus: false,
@@ -60,23 +60,32 @@ func (s *Audio) IsRec() bool {
 }
 
 func (s *Audio) StartPlayback() {
+	if s.playStatus {
+		return
+	}
 	go s.playback()
 }
 
 func (s *Audio) StopPlayback() {
-	if s.playStatus {
-		s.playStop <- struct{}{}
+	if !s.playStatus {
+		return
 	}
+	s.playStop <- struct{}{}
+
 }
 
 func (s *Audio) StartRec() {
+	if s.recStatus {
+		return
+	}
 	go s.rec()
 }
 
 func (s *Audio) StopRec() {
-	if s.recStatus {
-		s.recStop <- struct{}{}
+	if !s.recStatus {
+		return
 	}
+	s.recStop <- struct{}{}
 }
 
 func (s *Audio) rec() {

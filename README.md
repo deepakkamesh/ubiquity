@@ -20,4 +20,7 @@ Follow instructions on [blog](https://www.tinkernut.com/2017/04/adding-audio-out
 
 #### References
 * [webcam lib](https://github.com/blackjack/webcam)
-*
+
+
+#### TODO
+* Restart process from web ui
