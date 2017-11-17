@@ -22,6 +22,7 @@ type Video struct {
 	pixelFormat webcam.PixelFormat
 	stop        chan struct{}
 	fps         uint
+	capStatus   bool
 }
 
 func NewVideo(pixelFormat webcam.PixelFormat, h, w uint32, fps uint) *Video {
@@ -31,6 +32,7 @@ func NewVideo(pixelFormat webcam.PixelFormat, h, w uint32, fps uint) *Video {
 		width:       w,
 		stop:        make(chan struct{}),
 		fps:         fps,
+		capStatus:   false,
 	}
 }
 
@@ -68,36 +70,43 @@ func (s *Video) StartVideoStream() {
 }
 
 func (s *Video) StopVideoStream() {
-	s.stop <- struct{}{}
-	if err := s.cam.StopStreaming(); err != nil {
-		glog.Errorf("Failed to start stream:%v", err)
+	if s.capStatus {
+		s.stop <- struct{}{}
+		if err := s.cam.StopStreaming(); err != nil {
+			glog.Errorf("Failed to start stream:%v", err)
+		}
 	}
 }
 
 func (s *Video) startStreamer() {
+
 	// Since the ReadFrame is buffered, trying to read at FPS results in delay.
 	fpsTicker := time.NewTicker(time.Duration(1000/s.fps) * time.Millisecond)
 
 	if err := s.cam.StartStreaming(); err != nil {
 		glog.Errorf("Failed to start stream:%v", err)
+		return
 	}
+
+	s.capStatus = true
+	glog.Infof("Started Video Capture")
 
 	frame := []byte{}
 	for {
 		select {
 		case <-s.stop:
+			glog.Info("Stopped Video Capture")
+			s.capStatus = false
 			return
 
 		default:
 			if err := s.cam.WaitForFrame(5); err != nil {
 				glog.Errorf("Failed to read webcam:%v", err)
-				return
 			}
 			var err error
 			frame, err = s.cam.ReadFrame()
 			if err != nil || len(frame) == 0 {
 				glog.Errorf("Failed tp read webcam frame:%v or frame size 0", err)
-				return
 			}
 
 		case <-fpsTicker.C:

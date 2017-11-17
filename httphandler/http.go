@@ -46,6 +46,8 @@ type Server struct {
 	connCount  int // number of connected http clients.
 	servoStep  int // Servo step for each click.
 	servoAngle int // Current Angle for servo.
+
+	pauseRec bool
 }
 
 func New(dev *device.Ubiquity, aud *device.Audio, vid *device.Video) *Server {
@@ -55,6 +57,7 @@ func New(dev *device.Ubiquity, aud *device.Audio, vid *device.Video) *Server {
 		video:      vid,
 		servoAngle: 90,
 		servoStep:  30,
+		pauseRec:   false,
 	}
 }
 
@@ -141,12 +144,18 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 			s.servoAngle += s.servoStep
 
 		case AUDIO_START:
-			s.audio.StopRec()
+			if s.audio.IsRec() {
+				s.pauseRec = true
+				s.audio.StopRec()
+			}
 			s.audio.StartPlayback()
 
 		case AUDIO_STOP:
 			s.audio.StopPlayback()
-			s.audio.StartRec()
+			if s.pauseRec {
+				s.pauseRec = false
+				s.audio.StartRec()
+			}
 
 		case VIDEO_ENABLE:
 			fps := msg.Data.(float64)
