@@ -24,9 +24,13 @@ const (
 	SERVO_UP
 	SERVO_DOWN
 	SERVO_STEP
+	VIDEO_ENABLE
+	VIDEO_DISABLE
+	AUDIO_ENABLE
+	AUDIO_DISABLE
+	MASTER_ENABLE
+	MASTER_DISABLE
 )
-
-const ()
 
 // Control Message.
 type ControlMsg struct {
@@ -144,6 +148,19 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 			s.audio.StopPlayback()
 			s.audio.StartRec()
 
+		case VIDEO_ENABLE:
+			fps := msg.Data.(float64)
+			s.video.SetFPS(uint(fps))
+			s.video.StartVideoStream()
+
+		case VIDEO_DISABLE:
+			s.video.StopVideoStream()
+
+		case AUDIO_ENABLE:
+			s.audio.StartRec()
+
+		case AUDIO_DISABLE:
+			s.audio.StopRec()
 		}
 
 	}

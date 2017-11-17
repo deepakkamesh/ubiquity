@@ -47,6 +47,7 @@ func (s *Video) Init() error {
 
 	s.cam = cam
 	s.Stream = mjpeg.NewStream()
+
 	return nil
 }
 
@@ -63,6 +64,7 @@ func (s *Video) SetFPS(fps uint) {
 
 func (s *Video) StartVideoStream() {
 	go s.startStreamer()
+
 }
 
 func (s *Video) StopVideoStream() {
@@ -73,25 +75,32 @@ func (s *Video) StopVideoStream() {
 }
 
 func (s *Video) startStreamer() {
-	ticker := time.NewTicker(time.Duration(1000/s.fps) * time.Millisecond)
+	// Since the ReadFrame is buffered, trying to read at FPS results in delay.
+	fpsTicker := time.NewTicker(time.Duration(1000/s.fps) * time.Millisecond)
+
 	if err := s.cam.StartStreaming(); err != nil {
 		glog.Errorf("Failed to start stream:%v", err)
 	}
+
+	frame := []byte{}
 	for {
 		select {
 		case <-s.stop:
 			return
 
-		case <-ticker.C:
+		default:
 			if err := s.cam.WaitForFrame(5); err != nil {
 				glog.Errorf("Failed to read webcam:%v", err)
 				return
 			}
-			frame, err := s.cam.ReadFrame()
+			var err error
+			frame, err = s.cam.ReadFrame()
 			if err != nil || len(frame) == 0 {
 				glog.Errorf("Failed tp read webcam frame:%v or frame size 0", err)
 				return
 			}
+
+		case <-fpsTicker.C:
 			s.Stream.UpdateJPEG(frame)
 		}
 	}

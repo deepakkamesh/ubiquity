@@ -98,16 +98,26 @@
             <!-- SIDE NAV BAR -->
             <nav class="mdl-navigation">
                 <ul>
-                    <label id="master_enable" class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="master_enable">
+                    <label  class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="master_enable">
 										  <input type="checkbox" id="master_enable" class="mdl-switch__input" >
-									    <span class="mdl-switch__label">Enable Audio from Ubiquity</span>
+									    <span class="mdl-switch__label">Master Enable</span>
 								    </label>
                 </ul>
                 <ul>
-                    <label id="playback_enable" class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="playback_enable">
-										  <input type="checkbox" id="playback_enable" class="mdl-switch__input" >
-									    <span class="mdl-switch__label">Enable Audio from Ubiquity</span>
+                    <label  class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="audio_enable">
+										  <input type="checkbox" id="audio_enable" class="mdl-switch__input" >
+									    <span class="mdl-switch__label"> Audio Stream</span>
 								    </label>
+                </ul>
+                 <ul>
+                    <label  class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="video_enable">
+										  <input type="checkbox" id="video_enable" class="mdl-switch__input" >
+									    <span class="mdl-switch__label"> Video Stream</span>
+								    </label>
+                </ul>
+                <ul>
+                   Frames Per Second 
+                    <input id="fps_sel" class="mdl-slider mdl-js-slider" type="range" min="1" max="30" value="5" tabindex="0">
                 </ul>
             </nav>
         </div>
@@ -118,8 +128,11 @@
             <div class="mdl-grid demo-content">
 
                 <!-- Camera Out -->
-                <div class="mdl-cell mdl-cell--6-col">
-                    <!-- <img width=100% src="http://10.0.0.30:8888/?action=stream"> -->
+                <div class="mdl-cell mdl-cell--5-col">
+                        <img id="video_stream" width=100% alt="video unavailable"> 
+                </div>
+
+                <div class="mdl-cell mdl-cell--1-col">
                 </div>
 
                 <!-- Drive Buttons -->
@@ -219,12 +232,16 @@
                     <span id="servo-right-tip">0</span>'
                 </div>
 
+                 <div class="mdl-tooltip" data-mdl-for="fps_sel">
+                    <span id="fps-sel-tip">0</span>'
+                </div>
+               
             </div>
 
             <!-- Audio Capture -->
-            <div class="mdl-cell mdl-cell--2-col">
+            <div class="mdl-cell mdl-cell--12-col">
                 <button id="record_audio" class="mdl-button mdl-js-button mdl-button--raised ">
-                   		Rec
+                   	Press to Talk	
       				 	</button>
             </div>
 

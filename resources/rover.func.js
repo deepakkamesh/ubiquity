@@ -13,6 +13,12 @@ var CmdType = {
     SERVO_UP: 8,
     SERVO_DOWN: 9,
     SERVO_STEP: 10,
+    VIDEO_ENABLE: 11,
+    VIDEO_DISABLE: 12,
+    AUDIO_ENABLE: 13,
+    AUDIO_DISABLE: 14,
+    MASTER_ENABLE: 15,
+    MASTER_DISABLE: 16,
 }
 
 // Control message handlers
@@ -79,6 +85,40 @@ $(document).keydown(function(e) {
         return
     }
     SendControlCmd(cmd, parseInt($('#drive_velocity_sel').val()));
+});
+
+// Control
+$(document).ready(function() {
+   var masterEnable= document.querySelector('#master_enable');
+     masterEnable.addEventListener('click', function() {
+        if (document.getElementById('master_enable').checked) {
+            SendControlCmd(CmdType.MASTER_ENABLE);
+        } else {
+            SendControlCmd(CmdType.MASTER_DISABLE);
+        }
+    });
+
+  var audioEnable= document.querySelector('#audio_enable');
+     audioEnable.addEventListener('click', function() {
+        if (document.getElementById('audio_enable').checked) {
+            SendControlCmd(CmdType.AUDIO_ENABLE);
+        } else {
+            SendControlCmd(CmdType.AUDIO_DISABLE);
+        }
+    });
+
+   var videoEnable= document.querySelector('#video_enable');
+     videoEnable.addEventListener('click', function() {
+        val = parseInt($('#fps_sel').val());
+        if (document.getElementById('video_enable').checked) {
+            SendControlCmd(CmdType.VIDEO_ENABLE,val);
+            $("#video_stream").attr("src", "/videostream"+'?'+Math.random());
+        } else {
+            $("#video_stream").attr("src", "");
+            SendControlCmd(CmdType.VIDEO_DISABLE,val);
+        }
+    });
+  
 });
 
 // Servo and Drive Controls.
