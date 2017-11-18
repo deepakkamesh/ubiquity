@@ -28,8 +28,13 @@ func main() {
 
 		sslCert    = flag.String("ssl_cert", "cert.pem", "The SSL certificate in resources dir")
 		sslPrivKey = flag.String("ssl_priv_key", "privkey.pem", "SSL private Keyname in resources dir")
+		enPi       = flag.Bool("enable_pi_gpio", false, "Enable PI GPIO, I2C etc")
 
-		enPi = flag.Bool("enable_pi", false, "Enable PI Hardware (motors, servo)")
+		enVid     = flag.Bool("enable_video", false, "Enable Video")
+		vidHeight = flag.Uint("vid_height", 480, "Video Height")
+		vidWidth  = flag.Uint("vid_width", 640, "Video Width")
+
+		enAud = flag.Bool("enable_audio", false, "Enable Audio")
 	)
 
 	flag.Parse()
@@ -86,15 +91,21 @@ func main() {
 	dev := device.New(motorRightFwd, motorRightBwd, motorLeftFwd, motorLeftBwd, servo)
 
 	// Initialize audio device.
-	aud := device.NewAudio()
-	if err := aud.Init(512, 186, 8000, 4000); err != nil {
-		glog.Fatalf("Unable to initialize audio:%v", err)
+	var aud *device.Audio
+	if *enAud {
+		aud = device.NewAudio()
+		if err := aud.Init(512, 186, 8000, 4000); err != nil {
+			glog.Fatalf("Unable to initialize audio:%v", err)
+		}
 	}
 
 	// Initialize video device.
-	vid := device.NewVideo(device.MJPEG, 640, 480, 2)
-	if err := vid.Init(); err != nil {
-		glog.Fatalf("Unable to initialize video:%v", err)
+	var vid *device.Video
+	if *enVid {
+		vid = device.NewVideo(device.MJPEG, uint32(*vidWidth), uint32(*vidHeight), 2)
+		if err := vid.Init(); err != nil {
+			glog.Fatalf("Unable to initialize video:%v", err)
+		}
 	}
 
 	// Startup HTTP service.

@@ -165,7 +165,7 @@
                     <!-- Velocity Selector for drive -->
                     <input id="drive_velocity_sel" class="mdl-slider mdl-js-slider" type="range" min="10" max="500" value="50" tabindex="0">
                     <span class="mdl-chip">
-											 <span class="mdl-chip__text" id="drive_velocity_sel_disp">Select Speed</span>
+											 <span class="mdl-chip__text" id="drive_velocity_sel_disp">Speed (ms)</span>
                     </span>
                 </div>
 
@@ -183,11 +183,11 @@
                         <br/>
 
                         <button id="servo-left" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
-                            <li class="material-icons">keyboard_arrow_left</li>
+                            <li class="material-icons"></li>
                         </button> &emsp;&emsp;&emsp;&emsp;
 
                         <button id="servo-right" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
-                            <li class="material-icons">keyboard_arrow_right</li>
+                            <li class="material-icons"></li>
 												</button>
 
                         <br/>
@@ -200,43 +200,9 @@
                     <!-- Angle selector for drive -->
                     <input id="servo_angle_step" class="mdl-slider mdl-js-slider" type="range" min="10" max="60" value="30" tabindex="0">
                     <span class="mdl-chip">
-                       <span class="mdl-chip__text" id="servo_angle_step_disp">Select Servo Step</span>
+                       <span class="mdl-chip__text" id="servo_angle_step_disp">Servo Step (')</span>
                     </span>
                 </div>
-
-                <!-- Servo Angle ToolTips -->
-                <div class="mdl-tooltip" data-mdl-for="servo-down">
-                    <span id="servo-down-tip">0</span>'
-                </div>
-                <div class="mdl-tooltip" data-mdl-for="servo-up">
-                    <span id="servo-up-tip">0</span>'
-                </div>
-                <div class="mdl-tooltip" data-mdl-for="servo-left">
-                    <span id="servo-left-tip">10</span>'
-                </div>
-                <div class="mdl-tooltip" data-mdl-for="servo-right">
-                    <span id="servo-right-tip">0</span>'
-                </div>
-
-                <!-- Servo Angle ToolTips -->
-                <div class="mdl-tooltip" data-mdl-for="servo-down">
-                    <span id="servo-down-tip">0</span>'
-                </div>
-                <div class="mdl-tooltip" data-mdl-for="servo-up">
-                    <span id="servo-up-tip">0</span>'
-                </div>
-                <div class="mdl-tooltip" data-mdl-for="servo-left">
-                    <span id="servo-left-tip">10</span>'
-                </div>
-                <div class="mdl-tooltip" data-mdl-for="servo-right">
-                    <span id="servo-right-tip">0</span>'
-                </div>
-
-                 <div class="mdl-tooltip" data-mdl-for="fps_sel">
-                    <span id="fps-sel-tip">0</span>'
-                </div>
-               
-            </div>
 
             <!-- Audio Capture -->
             <div class="mdl-cell mdl-cell--12-col">
@@ -246,6 +212,7 @@
 						    </label>
             </div>
 
+       </div>
     </div>
 
     <div id="error-popup" class="mdl-js-snackbar mdl-snackbar">

@@ -66,7 +66,9 @@ func (s *Server) Start(hostPort string, resPath string, cert string, privkey str
 	// http routers.
 	http.HandleFunc("/audiostream", s.audioSock)
 	http.HandleFunc("/control", s.controlSock)
-	http.Handle("/videostream", s.video.Stream)
+	if s.video != nil {
+		http.Handle("/videostream", s.video.Stream)
+	}
 
 	// Serve static content from resources dir.
 	fs := http.FileServer(http.Dir(resPath))
