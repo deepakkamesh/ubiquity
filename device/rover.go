@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/golang/glog"
 	"gobot.io/x/gobot/drivers/gpio"
 )
 
@@ -20,6 +21,7 @@ type Ubiquity struct {
 	motorLeftFwd  *gpio.DirectPinDriver
 	motorLeftBwd  *gpio.DirectPinDriver
 	Servo         *Servo
+	lock          bool // Handbrake.
 }
 
 // Return a New initializaed ubiquity device.
@@ -36,7 +38,23 @@ func New(
 		motorLeftFwd:  mLF,
 		motorLeftBwd:  mLB,
 		Servo:         servo,
+		lock:          false,
 	}
+}
+
+// Lock acts like a handbrake and locks down movement and servo.
+func (s *Ubiquity) Lock(lock bool) error {
+	glog.Infof("Setting device lock: %v", lock)
+
+	if lock {
+		if err := s.AllMotorStop(); err != nil {
+			return err
+		}
+	}
+
+	s.Servo.Lock(lock)
+	s.lock = lock
+	return nil
 }
 
 // AllMotorStop stops all motors.
@@ -65,12 +83,18 @@ func (s *Ubiquity) AllMotorStop() error {
 
 // Move moves the rover for dur milliseconds in a specific direction.
 // dir 0 = fwd, 1 = bwd, 2 = left, 3 = right
-func (s *Ubiquity) MotorControl(dir int, dur time.Duration) error {
+func (s *Ubiquity) MotorControl(dir int, dur int) error {
 
 	if s.motorRightFwd == nil || s.motorRightBwd == nil ||
 		s.motorLeftFwd == nil || s.motorLeftBwd == nil {
 		return fmt.Errorf("motors not initialized")
 	}
+
+	if s.lock {
+		return fmt.Errorf("brake engaged")
+	}
+
+	glog.V(2).Infof("Running motors direction %v dur %v", dir, time.Duration(dur)*time.Millisecond)
 
 	switch dir {
 	case DRIVE_FWD:
@@ -106,6 +130,6 @@ func (s *Ubiquity) MotorControl(dir int, dur time.Duration) error {
 		}
 	}
 
-	time.Sleep(dur * time.Millisecond)
+	time.Sleep(time.Duration(dur) * time.Millisecond)
 	return s.AllMotorStop()
 }

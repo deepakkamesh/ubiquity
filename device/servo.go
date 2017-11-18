@@ -15,6 +15,7 @@ type Servo struct {
 	pin       string
 	pwmPeriod uint32 // PWM period in ms.
 	adaptor   gobot.Adaptor
+	lock      bool
 }
 
 // NewServo returns a new servo. note: pin is the BCMxx number not actual number.
@@ -23,7 +24,13 @@ func NewServo(piBlasterPeriod uint32, pin string, a gobot.Adaptor) *Servo {
 		pin:       pin,
 		pwmPeriod: piBlasterPeriod,
 		adaptor:   a,
+		lock:      false,
 	}
+}
+
+func (p *Servo) Lock(lock bool) error {
+	p.lock = lock
+	return nil
 }
 
 // Unexport unexports the pin and releases the pin from the operating system
@@ -38,6 +45,9 @@ func (p *Servo) Unexport() error {
 func (p *Servo) SetAngle(angle int) error {
 	if p == nil {
 		return errors.New("servo not initialized")
+	}
+	if p.lock {
+		return errors.New("servo locked")
 	}
 	if angle < 0 || angle > 180 {
 		return fmt.Errorf("Angle needs to be 0 to 180, got %v", angle)
@@ -54,6 +64,9 @@ func (p *Servo) SetAngle(angle int) error {
 func (p *Servo) SetDutyCycle(duty uint32) error {
 	if p == nil {
 		return errors.New("servo not initialized")
+	}
+	if p.lock {
+		return errors.New("servo locked")
 	}
 	if duty > p.pwmPeriod {
 		return errors.New("Duty cycle exceeds period.")

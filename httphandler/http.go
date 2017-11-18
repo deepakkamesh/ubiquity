@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/deepakkamesh/ubiquity/device"
 	"github.com/golang/glog"
@@ -107,26 +106,30 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 		switch msg.CmdType {
 		case DRIVE_FWD:
 			dur := msg.Data.(float64)
-			if err := s.dev.MotorControl(device.DRIVE_FWD, time.Duration(dur)); err != nil {
-				glog.Errorf("Failed to move motor %v", err)
+			if err := s.dev.MotorControl(device.DRIVE_FWD, int(dur)); err != nil {
+				glog.Errorf("Failed to move motor: %v", err)
+				sendError(err.Error(), c)
 			}
 
 		case DRIVE_BWD:
 			dur := msg.Data.(float64)
-			if err := s.dev.MotorControl(device.DRIVE_BWD, time.Duration(dur)); err != nil {
-				glog.Errorf("Failed to move motor %v", err)
+			if err := s.dev.MotorControl(device.DRIVE_BWD, int(dur)); err != nil {
+				glog.Errorf("Failed to move motor: %v", err)
+				sendError(err.Error(), c)
 			}
 
 		case DRIVE_LEFT:
 			dur := msg.Data.(float64)
-			if err := s.dev.MotorControl(device.DRIVE_LEFT, time.Duration(dur)); err != nil {
-				glog.Errorf("Failed to move motor %v", err)
+			if err := s.dev.MotorControl(device.DRIVE_LEFT, int(dur)); err != nil {
+				glog.Errorf("Failed to move motor: %v", err)
+				sendError(err.Error(), c)
 			}
 
 		case DRIVE_RIGHT:
 			dur := msg.Data.(float64)
-			if err := s.dev.MotorControl(device.DRIVE_RIGHT, time.Duration(dur)); err != nil {
-				glog.Errorf("Failed to move motor %v", err)
+			if err := s.dev.MotorControl(device.DRIVE_RIGHT, int(dur)); err != nil {
+				glog.Errorf("Failed to move motor: %v", err)
+				sendError(err.Error(), c)
 			}
 
 		case SERVO_STEP:
@@ -134,6 +137,7 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 
 		case SERVO_UP:
 			if err := s.dev.Servo.SetAngle(s.servoAngle - s.servoStep); err != nil {
+				glog.Errorf("Failed to move servo: %v", err)
 				sendError(err.Error(), c)
 				continue
 			}
@@ -141,6 +145,7 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 
 		case SERVO_DOWN:
 			if err := s.dev.Servo.SetAngle(s.servoAngle + s.servoStep); err != nil {
+				glog.Errorf("Failed to move servo: %v", err)
 				sendError(err.Error(), c)
 				continue
 			}
@@ -173,6 +178,19 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 
 		case AUDIO_DISABLE:
 			s.audio.StopRec()
+
+		case MASTER_DISABLE:
+			if err := s.dev.Lock(false); err != nil {
+				glog.Errorf("Failed to lock: %v", err)
+				sendError(err.Error(), c)
+			}
+
+		case MASTER_ENABLE:
+			if err := s.dev.Lock(true); err != nil {
+				glog.Errorf("Failed to lock: %v", err)
+				sendError(err.Error(), c)
+			}
+
 		}
 
 	}
