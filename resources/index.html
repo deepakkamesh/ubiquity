@@ -98,25 +98,25 @@
             <!-- SIDE NAV BAR -->
             <nav class="mdl-navigation">
                 <ul>
-                    <label  class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="master_enable">
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="master_enable">
 										  <input type="checkbox" id="master_enable" class="mdl-switch__input" >
 									    <span class="mdl-switch__label">Master Enable</span>
 								    </label>
                 </ul>
                 <ul>
-                    <label  class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="audio_enable">
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="audio_enable">
 										  <input type="checkbox" id="audio_enable" class="mdl-switch__input" >
 									    <span class="mdl-switch__label"> Audio Stream</span>
 								    </label>
                 </ul>
-                 <ul>
-                    <label  class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="video_enable">
+                <ul>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="video_enable">
 										  <input type="checkbox" id="video_enable" class="mdl-switch__input" >
 									    <span class="mdl-switch__label"> Video Stream</span>
 								    </label>
                 </ul>
                 <ul>
-                   Frames Per Second 
+                    Frames Per Second
                     <input id="fps_sel" class="mdl-slider mdl-js-slider" type="range" min="1" max="30" value="5" tabindex="0">
                 </ul>
             </nav>
@@ -129,7 +129,7 @@
 
                 <!-- Camera Out -->
                 <div class="mdl-cell mdl-cell--5-col">
-                        <img id="video_stream" width=100% alt="video unavailable"> 
+                    <img id="video_stream" width=100% alt="video unavailable">
                 </div>
 
                 <div class="mdl-cell mdl-cell--1-col">
@@ -204,23 +204,22 @@
                     </span>
                 </div>
 
-            <!-- Audio Capture -->
-            <div class="mdl-cell mdl-cell--12-col">
-                <label  class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="rec-start">
+                <!-- Audio Capture -->
+                <div class="mdl-cell mdl-cell--12-col">
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="rec-start">
 									  <input type="checkbox" id="rec-start" class="mdl-switch__input" >
 							      <span class="mdl-switch__label"> Record</span>
 						    </label>
+                </div>
+
+                <!-- SnackBar for error -->
+                <div id="error-popup" class="mdl-js-snackbar mdl-snackbar">
+                    <div class="mdl-snackbar__text"></div>
+                    <button class="mdl-snackbar__action" type="button"></button>
+                </div>
+
             </div>
-
-       </div>
-    </div>
-
-    <div id="error-popup" class="mdl-js-snackbar mdl-snackbar">
-        <div class="mdl-snackbar__text"></div>
-        <button class="mdl-snackbar__action" type="button"></button>
-    </div>
-
-    </main>
+        </main>
     </div>
     <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 </body>

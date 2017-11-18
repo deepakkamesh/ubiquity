@@ -89,8 +89,8 @@ $(document).keydown(function(e) {
 
 // Control
 $(document).ready(function() {
-   var masterEnable= document.querySelector('#master_enable');
-     masterEnable.addEventListener('click', function() {
+    var masterEnable = document.querySelector('#master_enable');
+    masterEnable.addEventListener('click', function() {
         if (document.getElementById('master_enable').checked) {
             SendControlCmd(CmdType.MASTER_ENABLE);
         } else {
@@ -98,8 +98,8 @@ $(document).ready(function() {
         }
     });
 
-  var audioEnable= document.querySelector('#audio_enable');
-     audioEnable.addEventListener('click', function() {
+    var audioEnable = document.querySelector('#audio_enable');
+    audioEnable.addEventListener('click', function() {
         if (document.getElementById('audio_enable').checked) {
             SendControlCmd(CmdType.AUDIO_ENABLE);
         } else {
@@ -107,18 +107,18 @@ $(document).ready(function() {
         }
     });
 
-   var videoEnable= document.querySelector('#video_enable');
-     videoEnable.addEventListener('click', function() {
+    var videoEnable = document.querySelector('#video_enable');
+    videoEnable.addEventListener('click', function() {
         val = parseInt($('#fps_sel').val());
         if (document.getElementById('video_enable').checked) {
-            SendControlCmd(CmdType.VIDEO_ENABLE,val);
-            $("#video_stream").attr("src", "/videostream"+'?'+Math.random());
+            SendControlCmd(CmdType.VIDEO_ENABLE, val);
+            $("#video_stream").attr("src", "/videostream" + '?' + Math.random());
         } else {
             $("#video_stream").attr("src", "");
-            SendControlCmd(CmdType.VIDEO_DISABLE,val);
+            SendControlCmd(CmdType.VIDEO_DISABLE, val);
         }
     });
-  
+
 });
 
 // Servo and Drive Controls.
@@ -266,16 +266,16 @@ $(document).ready(function() {
         source.start(0)
     }
 
- var recStart= document.querySelector('#rec-start');
-     recStart.addEventListener('click', function() {
+    var recStart = document.querySelector('#rec-start');
+    recStart.addEventListener('click', function() {
         if (document.getElementById('rec-start').checked) {
-          streamControl = true;
-          SendControlCmd(CmdType.AUDIO_START, '');
-          console.log("Rec. started");
+            streamControl = true;
+            SendControlCmd(CmdType.AUDIO_START, '');
+            console.log("Rec. started");
         } else {
-          streamControl = false;
-          SendControlCmd(CmdType.AUDIO_STOP, '');
-          console.log("Rec. stopped");
+            streamControl = false;
+            SendControlCmd(CmdType.AUDIO_STOP, '');
+            console.log("Rec. stopped");
         }
     });
 
