@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sync"
+	"time"
 
 	"github.com/golang/glog"
 
@@ -16,6 +18,7 @@ type Servo struct {
 	pwmPeriod uint32 // PWM period in ms.
 	adaptor   gobot.Adaptor
 	lock      bool
+	mut       sync.Mutex
 }
 
 // NewServo returns a new servo. note: pin is the BCMxx number not actual number.
@@ -56,7 +59,14 @@ func (p *Servo) SetAngle(angle int) error {
 	val := 500 + 1500*angle/180
 
 	glog.V(2).Infof("Setting angle:%v -> duty cycle:%v microsecs ", angle, val)
+
+	p.mut.Lock()
 	p.SetDutyCycle(uint32(val))
+	// Turning off servo prevent jitter. 0.1s for 60deg.
+	time.Sleep(150 * time.Millisecond)
+	p.SetDutyCycle(0)
+	p.mut.Unlock()
+
 	return nil
 }
 
