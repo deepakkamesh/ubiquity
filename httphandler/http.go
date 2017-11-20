@@ -60,7 +60,7 @@ func New(dev *device.Ubiquity, aud *device.Audio, vid *device.Video) *Server {
 	}
 }
 
-func (s *Server) Start(hostPort string, resPath string, cert string, privkey string) error {
+func (s *Server) Start(hostPort string, resPath string, cert string, privkey string, ssl bool) error {
 
 	// http routers.
 	http.HandleFunc("/audiostream", s.audioSock)
@@ -73,8 +73,10 @@ func (s *Server) Start(hostPort string, resPath string, cert string, privkey str
 	fs := http.FileServer(http.Dir(resPath))
 	http.Handle("/", fs)
 
-	//return http.ListenAndServeTLS(hostPort, resPath+"/server.crt", resPath+"/server.key", nil)
-	return http.ListenAndServeTLS(hostPort, resPath+"/"+cert, resPath+"/"+privkey, nil)
+	if ssl {
+		return http.ListenAndServeTLS(hostPort, resPath+"/"+cert, resPath+"/"+privkey, nil)
+	}
+	return http.ListenAndServe(hostPort, nil)
 }
 
 // controlSock handles the control messages from the http client.
