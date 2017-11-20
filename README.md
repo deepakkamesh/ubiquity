@@ -24,3 +24,14 @@ Follow instructions on [blog](https://www.tinkernut.com/2017/04/adding-audio-out
 
 #### TODO
 * Restart process from web ui
+
+#### Current Profile
+* H bridge 30ma (rest)
+* Servo - negligible (rest)
+* Speaker - 10ma (rest)
+* Display - negligible (rest)
+* All devices powered on - 170ma
+* Running binary - 220ma (total)
+* Streaming video - 260ma
+* Audio Streams - 300ma
+
