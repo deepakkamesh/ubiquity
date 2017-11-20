@@ -81,7 +81,11 @@ func (s *Server) Start(hostPort string, resPath string, cert string, privkey str
 
 // controlSock handles the control messages from the http client.
 func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
-	upgrader := websocket.Upgrader{}
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		glog.Errorf("Failed to upgrade conn:%v", err)
@@ -218,7 +222,12 @@ func sendError(errorString string, c *websocket.Conn) {
 
 // audioSock handles audio playback from browser.
 func (s *Server) audioSock(w http.ResponseWriter, r *http.Request) {
-	upgrader := websocket.Upgrader{}
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		glog.Errorf("failed to upgrade conn:%v", err)
