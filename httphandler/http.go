@@ -201,8 +201,11 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 			}
 
 		case VIDEO_ENABLE:
-			fps := msg.Data.(float64)
+			data := msg.Data.([]interface{})
+			fps := uint(data[0].(float64))
+			resMode := int(data[1].(float64))
 			s.video.SetFPS(uint(fps))
+			s.video.SetResMode(resMode)
 			s.video.StartVideoStream()
 
 		case VIDEO_DISABLE:

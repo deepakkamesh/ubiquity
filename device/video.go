@@ -14,6 +14,21 @@ const (
 	YUYV422 webcam.PixelFormat = 1448695129
 )
 
+// Width, Height.
+var CamResolutions = map[int][]int{
+	1:  {160, 120},
+	2:  {176, 144},
+	3:  {320, 176},
+	4:  {320, 240},
+	5:  {352, 288},
+	6:  {432, 240},
+	7:  {544, 288},
+	8:  {640, 360},
+	9:  {640, 480},
+	10: {800, 480},
+	11: {1024, 768},
+}
+
 type Video struct {
 	Stream      *mjpeg.Stream
 	cam         *webcam.Webcam
@@ -25,7 +40,7 @@ type Video struct {
 	capStatus   bool
 }
 
-func NewVideo(pixelFormat webcam.PixelFormat, h, w uint32, fps uint) *Video {
+func NewVideo(pixelFormat webcam.PixelFormat, w, h uint32, fps uint) *Video {
 	return &Video{
 		pixelFormat: pixelFormat,
 		height:      h,
@@ -50,6 +65,17 @@ func (s *Video) Init() error {
 	s.cam = cam
 	s.Stream = mjpeg.NewStream()
 
+	return nil
+}
+
+func (s *Video) SetResMode(i int) error {
+	return s.SetRes(uint32(CamResolutions[i][1]), uint32(CamResolutions[i][0]))
+}
+
+func (s *Video) SetRes(h, w uint32) error {
+	if _, _, _, err := s.cam.SetImageFormat(s.pixelFormat, w, h); err != nil {
+		return err
+	}
 	return nil
 }
 
