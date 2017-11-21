@@ -30,6 +30,8 @@ const (
 	MASTER_ENABLE
 	MASTER_DISABLE
 	SERVO_ABS // Servo absolute value in degrees 0 - 180
+	DRIVE_LEFT_ONLY
+	DRIVE_RIGHT_ONLY
 )
 
 // Control Message.
@@ -132,9 +134,23 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 				sendError(err.Error(), c)
 			}
 
+		case DRIVE_LEFT_ONLY:
+			dur := msg.Data.(float64)
+			if err := s.dev.MotorControl(device.DRIVE_LEFT_ONLY, int(dur)); err != nil {
+				glog.Errorf("Failed to move motor: %v", err)
+				sendError(err.Error(), c)
+			}
+
 		case DRIVE_RIGHT:
 			dur := msg.Data.(float64)
 			if err := s.dev.MotorControl(device.DRIVE_RIGHT, int(dur)); err != nil {
+				glog.Errorf("Failed to move motor: %v", err)
+				sendError(err.Error(), c)
+			}
+
+		case DRIVE_RIGHT_ONLY:
+			dur := msg.Data.(float64)
+			if err := s.dev.MotorControl(device.DRIVE_RIGHT_ONLY, int(dur)); err != nil {
 				glog.Errorf("Failed to move motor: %v", err)
 				sendError(err.Error(), c)
 			}

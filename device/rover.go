@@ -13,6 +13,8 @@ const (
 	DRIVE_BWD
 	DRIVE_LEFT
 	DRIVE_RIGHT
+	DRIVE_LEFT_ONLY
+	DRIVE_RIGHT_ONLY
 )
 
 type Ubiquity struct {
@@ -82,7 +84,7 @@ func (s *Ubiquity) AllMotorStop() error {
 }
 
 // Move moves the rover for dur milliseconds in a specific direction.
-// dir 0 = fwd, 1 = bwd, 2 = left, 3 = right
+// dir 0 = fwd, 1 = bwd, 2 = left, 3 = right, 4 = left_only, 5= right_only
 func (s *Ubiquity) MotorControl(dir int, dur int) error {
 
 	if s.motorRightFwd == nil || s.motorRightBwd == nil ||
@@ -128,6 +130,17 @@ func (s *Ubiquity) MotorControl(dir int, dur int) error {
 		if err := s.motorLeftBwd.DigitalWrite(1); err != nil {
 			return err
 		}
+
+	case DRIVE_LEFT_ONLY:
+		if err := s.motorLeftFwd.DigitalWrite(1); err != nil {
+			return err
+		}
+
+	case DRIVE_RIGHT_ONLY:
+		if err := s.motorRightFwd.DigitalWrite(1); err != nil {
+			return err
+		}
+
 	}
 
 	time.Sleep(time.Duration(dur) * time.Millisecond)
