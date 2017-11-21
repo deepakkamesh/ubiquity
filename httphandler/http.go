@@ -29,6 +29,7 @@ const (
 	AUDIO_DISABLE
 	MASTER_ENABLE
 	MASTER_DISABLE
+	SERVO_ABS // Servo absolute value in degrees 0 - 180
 )
 
 // Control Message.
@@ -156,6 +157,18 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 			s.servoAngle += s.servoStep
+
+		case SERVO_ABS:
+			angle := int(msg.Data.(float64))
+			if angle > 180 || angle < 0 {
+				sendError("Angle needs to be 0' to 180'", c)
+				continue
+			}
+			if err := s.dev.Servo.SetAngle(angle); err != nil {
+				glog.Errorf("Failed to move servo: %v", err)
+				sendError(err.Error(), c)
+			}
+			s.servoAngle = angle
 
 		case AUDIO_START:
 			if s.audio.IsRec() {

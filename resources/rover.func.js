@@ -19,6 +19,7 @@ var CmdType = {
     AUDIO_DISABLE: 14,
     MASTER_ENABLE: 15,
     MASTER_DISABLE: 16,
+    SERVO_ABS: 17,
 }
 
 // Control message handlers
@@ -142,12 +143,15 @@ $(document).ready(function() {
         SendControlCmd(CmdType.SERVO_UP);
     });
 
-    // TODO: Change to center and max or something.
-    var servoLeftButton = document.querySelector('#servo-left');
-    servoLeftButton.addEventListener('click', function() {});
+    var servoLowButton = document.querySelector('#servo-low');
+      servoLowButton.addEventListener('click', function() {
+       SendControlCmd(CmdType.SERVO_ABS,180);
+    });
 
-    var servoRightButton = document.querySelector('#servo-right');
-    servoRightButton.addEventListener('click', function() {});
+    var servoHighButton = document.querySelector('#servo-high');
+      servoHighButton.addEventListener('click', function() {
+       SendControlCmd(CmdType.SERVO_ABS,0);
+    });
 
     // Set the step for Servo.
     var servoAngleDeltaSel = document.querySelector('#servo_angle_step');

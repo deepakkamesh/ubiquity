@@ -62,8 +62,8 @@ func (p *Servo) SetAngle(angle int) error {
 
 	p.mut.Lock()
 	p.SetDutyCycle(uint32(val))
-	// Turning off servo prevent jitter. 0.1s for 60deg.
-	time.Sleep(150 * time.Millisecond)
+	// Turning off servo prevent jitter. 0.1s for 60deg. so 0.3 for 180.
+	time.Sleep(300 * time.Millisecond)
 	p.SetDutyCycle(0)
 	p.mut.Unlock()
 
