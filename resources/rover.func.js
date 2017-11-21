@@ -72,8 +72,8 @@ $(document).keydown(function(e) {
     switch (e.which) {
         case 37:
             if (document.getElementById('rotate_dual').checked) {
-              cmd = CmdType.DRIVE_LEFT;
-              break;
+                cmd = CmdType.DRIVE_LEFT;
+                break;
             }
             cmd = CmdType.DRIVE_LEFT_ONLY;
             break;
@@ -82,8 +82,8 @@ $(document).keydown(function(e) {
             break;
         case 39:
             if (document.getElementById('rotate_dual').checked) {
-              cmd = CmdType.DRIVE_RIGHT;
-              break;
+                cmd = CmdType.DRIVE_RIGHT;
+                break;
             }
             cmd = CmdType.DRIVE_RIGHT_ONLY;
             break;
@@ -121,16 +121,17 @@ $(document).ready(function() {
 
     var videoEnable = document.querySelector('#video_enable');
     videoEnable.addEventListener('click', function() {
-        val = parseInt($('#fps_sel').val());
+        fps = parseInt($('#fps_sel').val());
+        resMode = parseInt($('#res-sel').val());
+        data = [fps, resMode];
         if (document.getElementById('video_enable').checked) {
-            SendControlCmd(CmdType.VIDEO_ENABLE, val);
+            SendControlCmd(CmdType.VIDEO_ENABLE, data);
             $("#video_stream").attr("src", "/videostream" + '?' + Math.random());
         } else {
             $("#video_stream").attr("src", "");
-            SendControlCmd(CmdType.VIDEO_DISABLE, val);
+            SendControlCmd(CmdType.VIDEO_DISABLE, data);
         }
     });
-
 });
 
 // Servo and Drive Controls.
@@ -143,7 +144,7 @@ $(document).ready(function() {
         $("#drive_velocity_sel_disp").append(val);
     });
 
- 
+
     // Servo Controls.
     document.querySelector('#servo-down').addEventListener('click', function() {
         SendControlCmd(CmdType.SERVO_DOWN);
@@ -154,15 +155,15 @@ $(document).ready(function() {
     });
 
     document.querySelector('#servo-top').addEventListener('click', function() {
-       SendControlCmd(CmdType.SERVO_ABS,0);
+        SendControlCmd(CmdType.SERVO_ABS, 0);
     });
 
     document.querySelector('#servo-center').addEventListener('click', function() {
-       SendControlCmd(CmdType.SERVO_ABS,90);
+        SendControlCmd(CmdType.SERVO_ABS, 90);
     });
 
     document.querySelector('#servo-bottom').addEventListener('click', function() {
-       SendControlCmd(CmdType.SERVO_ABS,180);
+        SendControlCmd(CmdType.SERVO_ABS, 180);
     });
 
     // Set the step for Servo.

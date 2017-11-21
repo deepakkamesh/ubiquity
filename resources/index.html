@@ -119,6 +119,10 @@
                     Frames Per Second
                     <input id="fps_sel" class="mdl-slider mdl-js-slider" type="range" min="1" max="30" value="5" tabindex="0">
                 </ul>
+                <ul>
+                    Resolution
+                    <input id="res-sel" class="mdl-slider mdl-js-slider" type="range" min="1" max="11" value="2" tabindex="0">
+                </ul>
             </nav>
         </div>
 
@@ -128,12 +132,10 @@
             <div class="mdl-grid demo-content">
 
                 <!-- Camera Out -->
-                <div class="mdl-cell mdl-cell--5-col">
-                    <img id="video_stream" width=100% alt="video unavailable">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <img id="video_stream" width=100%>
                 </div>
 
-                <div class="mdl-cell mdl-cell--1-col">
-                </div>
 
                 <!-- Drive Buttons -->
                 <div class="mdl-cell mdl-cell--3-col">
@@ -149,14 +151,11 @@
 
                         <button id="motor-left" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
                             <li class="material-icons">keyboard_arrow_left</li>
-                        </button> 
-
-                        &emsp;
+                        </button> &emsp;
                         <label class="mdl-icon-toggle mdl-js-icon-toggle mdl-js-ripple-effect" for="rotate_dual">
                                   <input type="checkbox" id="rotate_dual" class="mdl-icon-toggle__input" checked >
                                     <i class="mdl-icon-toggle__label material-icons">screen_rotation</i>
-                        </label>
-                        &emsp;
+                        </label> &emsp;
 
                         <button id="motor-right" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
                             <li class="material-icons">keyboard_arrow_right</li>
@@ -195,7 +194,7 @@
 
                         <button id="servo-center" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
                             <li class="material-icons">vertical_align_center</li>
-                        </button> 
+                        </button>
 
                         <button id="servo-top" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
                             <li class="material-icons">vertical_align_top</li>
@@ -216,7 +215,7 @@
                 </div>
 
                 <!-- Audio Capture -->
-                <div class="mdl-cell mdl-cell--12-col">
+                <div class="mdl-cell mdl-cell--2-col">
                     <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="rec-start">
 									  <input type="checkbox" id="rec-start" class="mdl-switch__input" >
 							      <span class="mdl-switch__label"> Record</span>

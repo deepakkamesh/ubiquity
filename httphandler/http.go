@@ -206,7 +206,9 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 			resMode := int(data[1].(float64))
 			s.video.SetFPS(uint(fps))
 			s.video.SetResMode(resMode)
-			s.video.StartVideoStream()
+			if err := s.video.StartVideoStream(); err != nil {
+				glog.Errorf("Failed to StartVid:%v", err)
+			}
 
 		case VIDEO_DISABLE:
 			s.video.StopVideoStream()

@@ -104,9 +104,6 @@ func main() {
 	var vid *device.Video
 	if *enVid {
 		vid = device.NewVideo(device.MJPEG, uint32(*vidWidth), uint32(*vidHeight), 2)
-		if err := vid.Init(); err != nil {
-			glog.Fatalf("Unable to initialize video:%v", err)
-		}
 	}
 
 	// Startup HTTP service.

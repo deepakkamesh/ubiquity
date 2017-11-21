@@ -40,7 +40,7 @@ type Video struct {
 	capStatus   bool
 }
 
-func NewVideo(pixelFormat webcam.PixelFormat, w, h uint32, fps uint) *Video {
+func NewVideo(pixelFormat webcam.PixelFormat, w uint32, h uint32, fps uint) *Video {
 	return &Video{
 		pixelFormat: pixelFormat,
 		height:      h,
@@ -48,58 +48,48 @@ func NewVideo(pixelFormat webcam.PixelFormat, w, h uint32, fps uint) *Video {
 		stop:        make(chan struct{}),
 		fps:         fps,
 		capStatus:   false,
+		Stream:      mjpeg.NewStream(),
 	}
 }
 
-func (s *Video) Init() error {
-	cam, err := webcam.Open("/dev/video0")
-	if err != nil {
-		return err
-	}
-
-	// Initial image size.
-	if _, _, _, err := cam.SetImageFormat(s.pixelFormat, s.width, s.height); err != nil {
-		return err
-	}
-
-	s.cam = cam
-	s.Stream = mjpeg.NewStream()
-
-	return nil
+func (s *Video) SetResMode(i int) {
+	s.SetRes(uint32(CamResolutions[i][0]), uint32(CamResolutions[i][1]))
 }
 
-func (s *Video) SetResMode(i int) error {
-	return s.SetRes(uint32(CamResolutions[i][1]), uint32(CamResolutions[i][0]))
-}
-
-func (s *Video) SetRes(h, w uint32) error {
-	if _, _, _, err := s.cam.SetImageFormat(s.pixelFormat, w, h); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *Video) SetFormat(pixelFormat webcam.PixelFormat, h, w uint32) error {
-	if _, _, _, err := s.cam.SetImageFormat(pixelFormat, w, h); err != nil {
-		return err
-	}
-	return nil
+func (s *Video) SetRes(w uint32, h uint32) {
+	s.height = h
+	s.width = w
 }
 
 func (s *Video) SetFPS(fps uint) {
 	s.fps = fps
 }
 
-func (s *Video) StartVideoStream() {
-	go s.startStreamer()
+func (s *Video) StartVideoStream() error {
+	cam, err := webcam.Open("/dev/video0")
+	if err != nil {
+		return err
+	}
 
+	if _, _, _, err := cam.SetImageFormat(s.pixelFormat, s.width, s.height); err != nil {
+		return err
+	}
+
+	s.cam = cam
+
+	if !s.capStatus {
+		go s.startStreamer()
+		return nil
+	}
+	glog.Info("Video capture already running")
+	return nil
 }
 
 func (s *Video) StopVideoStream() {
 	if s.capStatus {
 		s.stop <- struct{}{}
-		if err := s.cam.StopStreaming(); err != nil {
-			glog.Errorf("Failed to start stream:%v", err)
+		if err := s.cam.Close(); err != nil {
+			glog.Errorf("Failed to stop stream:%v", err)
 		}
 	}
 }
