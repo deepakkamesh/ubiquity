@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"sync"
 	"time"
 
 	"gobot.io/x/gobot/drivers/gpio"
@@ -53,6 +54,7 @@ func main() {
 		motorRightBwd, motorRightFwd *gpio.DirectPinDriver
 		motorLeftBwd, motorLeftFwd   *gpio.DirectPinDriver
 		servo                        *device.Servo
+		oled                         *device.OLED
 	)
 
 	if *enPi {
@@ -86,6 +88,22 @@ func main() {
 		// Initialize Servo.
 		servo = device.NewServo(20000, "23", pi)
 		servo.SetAngle(90)
+
+		// Initialize I2C OLED display and load some default image.
+		oled = device.NewOLED()
+		var mut sync.Mutex
+		if err := oled.InitOLED(pi, 1, 0x3c, &mut, "display"); err != nil {
+			glog.Fatalf("Failed to initialize OLED:%v", err)
+		}
+		if err := oled.Run(); err != nil {
+			glog.Fatalf("Failed to start OLED:%v", err)
+		}
+
+		img, err := device.LoadImages(*res + "/walle_smile_medium.png")
+		if err != nil {
+			glog.Errorf("Failed to load display image:%v", err)
+		}
+		oled.Animate(img, 500)
 	}
 
 	// Initialize new Ubiquity Device.
