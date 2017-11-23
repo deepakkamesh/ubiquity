@@ -34,6 +34,12 @@ const (
 	DRIVE_RIGHT_ONLY
 	HEADLIGHT_ON
 	HEADLIGHT_OFF
+	STATUS
+)
+
+// Status Fields.
+const (
+	AUDIO = iota
 )
 
 // Control Message.
@@ -243,8 +249,31 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 				glog.Errorf("Failed to turn off headlight:%v", err)
 				sendError(err.Error(), c)
 			}
+
+		case STATUS:
+			data := []int{1, 2, 3, 4}
+			sendData(data, c)
+
 		}
 
+	}
+}
+
+// sendData constructs a data packet to send to the browser.
+func sendData(d []int, c *websocket.Conn) {
+	msg := ControlMsg{
+		CmdType: STATUS,
+		Data:    d,
+	}
+
+	jsMsg, err := json.Marshal(msg)
+	if err != nil {
+		glog.Errorf("Failed to unmarshall: %v", err)
+	}
+
+	err = c.WriteMessage(websocket.TextMessage, jsMsg)
+	if err != nil {
+		glog.Errorf("Failed to write websocket: %v", err)
 	}
 }
 

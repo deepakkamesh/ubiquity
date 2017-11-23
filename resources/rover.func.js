@@ -24,9 +24,15 @@ var CmdType = {
     DRIVE_RIGHT_ONLY: 19,
     HEADLIGHT_ON: 20,
     HEADLIGHT_OFF: 21,
+    STATUS: 22,
 }
 
-// Control message handlers
+var Statuses = {
+        AUDIO: 0,
+
+}
+
+// Control Websocket message handlers
 $(document).ready(function() {
     var errorContainer = document.querySelector('#error-popup');
 
@@ -50,6 +56,9 @@ $(document).ready(function() {
                     message: 'Error: ' + msg.Data
                 };
                 errorContainer.MaterialSnackbar.showSnackbar(err);
+
+            case CmdType.STATUS:
+                console.log(msg.Data);
         }
     }
 
@@ -65,6 +74,14 @@ $(document).ready(function() {
         console.log(cmdJS);
         wsCtrl.send(cmdJS);
     }
+
+
+    setInterval(myMethod, 5000);
+
+    function myMethod() {
+        SendControlCmd(CmdType.STATUS)
+    }
+
 });
 
 // Callback for keyboard keys Drive Control.
