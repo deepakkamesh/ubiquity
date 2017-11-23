@@ -22,7 +22,8 @@ var CmdType = {
     SERVO_ABS: 17,
     DRIVE_LEFT_ONLY: 18,
     DRIVE_RIGHT_ONLY: 19,
-
+    HEADLIGHT_ON: 20,
+    HEADLIGHT_OFF: 21,
 }
 
 // Control message handlers
@@ -118,6 +119,16 @@ $(document).ready(function() {
             SendControlCmd(CmdType.AUDIO_DISABLE);
         }
     });
+
+    document.querySelector('#headlight_enable').addEventListener('click', function() {
+        if (document.getElementById('headlight_enable').checked) {
+            SendControlCmd(CmdType.HEADLIGHT_ON);
+        } else {
+            SendControlCmd(CmdType.HEADLIGHT_OFF);
+        }
+    });
+
+
 
     var videoEnable = document.querySelector('#video_enable');
     videoEnable.addEventListener('click', function() {

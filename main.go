@@ -26,6 +26,7 @@ func main() {
 		mlbwd        = flag.String("left_motor_bwd_pin", "7", "Motor controller")
 		mrfwd        = flag.String("right_motor_fwd_pin", "13", "Motor controller")
 		mrbwd        = flag.String("right_motor_bwd_pin", "15", "Motor controller")
+		hlPin        = flag.String("headlight_pin", "18", "Headlight Pin")
 
 		ssl        = flag.Bool("serve_ssl", true, "Serve HTTP over ssl")
 		sslCert    = flag.String("ssl_cert", "cert.pem", "The SSL certificate in resources dir")
@@ -55,6 +56,7 @@ func main() {
 		motorLeftBwd, motorLeftFwd   *gpio.DirectPinDriver
 		servo                        *device.Servo
 		oled                         *device.OLED
+		headlight                    *gpio.LedDriver
 	)
 
 	if *enPi {
@@ -85,9 +87,15 @@ func main() {
 			glog.Fatalf("Failed to setup GPIO: %v", err)
 		}
 
-		// Initialize Servo.
+		// Initialize Servo. Pin is the BCMxx
 		servo = device.NewServo(20000, "23", pi)
 		servo.SetAngle(90)
+
+		// Initialize headlight.
+		headlight = gpio.NewLedDriver(pi, *hlPin)
+		if err := headlight.Start(); err != nil {
+			glog.Fatalf("Failed to setup headlight")
+		}
 
 		// Initialize I2C OLED display and load some default image.
 		oled = device.NewOLED()
@@ -98,7 +106,6 @@ func main() {
 		if err := oled.Run(); err != nil {
 			glog.Fatalf("Failed to start OLED:%v", err)
 		}
-
 		img, err := device.LoadImages(*res + "/walle_smile_medium.png")
 		if err != nil {
 			glog.Errorf("Failed to load display image:%v", err)
@@ -107,7 +114,7 @@ func main() {
 	}
 
 	// Initialize new Ubiquity Device.
-	dev := device.New(motorRightFwd, motorRightBwd, motorLeftFwd, motorLeftBwd, servo)
+	dev := device.New(motorRightFwd, motorRightBwd, motorLeftFwd, motorLeftBwd, servo, headlight)
 
 	// Initialize audio device.
 	var aud *device.Audio

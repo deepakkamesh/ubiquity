@@ -24,6 +24,7 @@ type Ubiquity struct {
 	motorLeftBwd  *gpio.DirectPinDriver
 	Servo         *Servo
 	lock          bool // Handbrake.
+	Headlight     *gpio.LedDriver
 }
 
 // Return a New initializaed ubiquity device.
@@ -33,6 +34,7 @@ func New(
 	mLF *gpio.DirectPinDriver,
 	mLB *gpio.DirectPinDriver,
 	servo *Servo,
+	hl *gpio.LedDriver,
 ) *Ubiquity {
 	return &Ubiquity{
 		motorRightFwd: mRF,
@@ -41,6 +43,7 @@ func New(
 		motorLeftBwd:  mLB,
 		Servo:         servo,
 		lock:          false,
+		Headlight:     hl,
 	}
 }
 

@@ -32,6 +32,8 @@ const (
 	SERVO_ABS // Servo absolute value in degrees 0 - 180
 	DRIVE_LEFT_ONLY
 	DRIVE_RIGHT_ONLY
+	HEADLIGHT_ON
+	HEADLIGHT_OFF
 )
 
 // Control Message.
@@ -231,6 +233,16 @@ func (s *Server) controlSock(w http.ResponseWriter, r *http.Request) {
 				sendError(err.Error(), c)
 			}
 
+		case HEADLIGHT_ON:
+			if err := s.dev.Headlight.On(); err != nil {
+				glog.Errorf("Failed to turn on headlight:%v", err)
+				sendError(err.Error(), c)
+			}
+		case HEADLIGHT_OFF:
+			if err := s.dev.Headlight.Off(); err != nil {
+				glog.Errorf("Failed to turn off headlight:%v", err)
+				sendError(err.Error(), c)
+			}
 		}
 
 	}
