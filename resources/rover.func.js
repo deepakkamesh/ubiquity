@@ -28,7 +28,7 @@ var CmdType = {
 }
 
 var Statuses = {
-        AUDIO: 0,
+    AUDIO: 0,
 
 }
 
@@ -58,7 +58,7 @@ $(document).ready(function() {
                 errorContainer.MaterialSnackbar.showSnackbar(err);
 
             case CmdType.STATUS:
-                console.log(msg.Data);
+                //console.log(msg.Data);
         }
     }
 
@@ -79,7 +79,7 @@ $(document).ready(function() {
     setInterval(myMethod, 5000);
 
     function myMethod() {
-        SendControlCmd(CmdType.STATUS)
+        //SendControlCmd(CmdType.STATUS)
     }
 
 });
@@ -117,10 +117,9 @@ $(document).keydown(function(e) {
     SendControlCmd(cmd, parseInt($('#drive_velocity_sel').val()));
 });
 
-// Control
+// Configuration Control.
 $(document).ready(function() {
-    var masterEnable = document.querySelector('#master_enable');
-    masterEnable.addEventListener('click', function() {
+    document.querySelector('#master_enable').addEventListener('click', function() {
         if (document.getElementById('master_enable').checked) {
             SendControlCmd(CmdType.MASTER_ENABLE);
         } else {
@@ -128,8 +127,7 @@ $(document).ready(function() {
         }
     });
 
-    var audioEnable = document.querySelector('#audio_enable');
-    audioEnable.addEventListener('click', function() {
+    document.querySelector('#audio_enable').addEventListener('click', function() {
         if (document.getElementById('audio_enable').checked) {
             SendControlCmd(CmdType.AUDIO_ENABLE);
         } else {
@@ -145,10 +143,7 @@ $(document).ready(function() {
         }
     });
 
-
-
-    var videoEnable = document.querySelector('#video_enable');
-    videoEnable.addEventListener('click', function() {
+    document.querySelector('#video_enable').addEventListener('click', function() {
         fps = parseInt($('#fps_sel').val());
         resMode = parseInt($('#res-sel').val());
         data = [fps, resMode];
@@ -164,14 +159,40 @@ $(document).ready(function() {
 
 // Servo and Drive Controls.
 $(document).ready(function() {
+
+
+    // Motor Controls.
+    document.querySelector('#motor-forward').addEventListener('click', function() {
+        SendControlCmd(CmdType.DRIVE_FWD, parseInt($('#drive_velocity_sel').val()));
+    });
+
+    document.querySelector('#motor-back').addEventListener('click', function() {
+        SendControlCmd(CmdType.DRIVE_BWD, parseInt($('#drive_velocity_sel').val()));
+    });
+
+    document.querySelector('#motor-right').addEventListener('click', function() {
+        if (document.getElementById('rotate_dual').checked) {
+            SendControlCmd(CmdType.DRIVE_RIGHT, parseInt($('#drive_velocity_sel').val()));
+            return;
+        }
+        SendControlCmd(CmdType.DRIVE_RIGHT_ONLY, parseInt($('#drive_velocity_sel').val()));
+
+    });
+
+    document.querySelector('#motor-left').addEventListener('click', function() {
+        if (document.getElementById('rotate_dual').checked) {
+            SendControlCmd(CmdType.DRIVE_LEFT, parseInt($('#drive_velocity_sel').val()));
+            return;
+        }
+        SendControlCmd(CmdType.DRIVE_LEFT_ONLY, parseInt($('#drive_velocity_sel').val()));
+    });
+
     // Drive velocity selector.
-    var driveVelSel = document.querySelector('#drive_velocity_sel');
-    driveVelSel.addEventListener('click', function() {
+    document.querySelector('#drive_velocity_sel').addEventListener('click', function() {
         val = $('#drive_velocity_sel').val();
         $("#drive_velocity_sel_disp").empty()
         $("#drive_velocity_sel_disp").append(val);
     });
-
 
     // Servo Controls.
     document.querySelector('#servo-down').addEventListener('click', function() {
@@ -195,8 +216,7 @@ $(document).ready(function() {
     });
 
     // Set the step for Servo.
-    var servoAngleDeltaSel = document.querySelector('#servo_angle_step');
-    servoAngleDeltaSel.addEventListener('click', function() {
+    document.querySelector('#servo_angle_step').addEventListener('click', function() {
         val = $('#servo_angle_step').val();
         $("#servo_angle_step_disp").empty();
         $("#servo_angle_step_disp").append(val);
