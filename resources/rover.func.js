@@ -289,7 +289,7 @@ $(document).ready(function() {
     var handleSuccess = function(stream) {
         var context = new AudioContext();
         var source = context.createMediaStreamSource(stream);
-        var processor = context.createScriptProcessor(1024, 1, 1);
+        var processor = context.createScriptProcessor(16384, 1, 1); 
 
         source.connect(processor);
         processor.connect(context.destination);

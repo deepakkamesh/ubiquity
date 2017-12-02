@@ -2,7 +2,10 @@ package main
 
 import (
 	"flag"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	"gobot.io/x/gobot/drivers/gpio"
@@ -120,7 +123,7 @@ func main() {
 	var aud *device.Audio
 	if *enAud {
 		aud = device.NewAudio()
-		if err := aud.Init(512, 186, 8000, 4000); err != nil {
+		if err := aud.Init(512, 1480, 8000, 4000); err != nil {
 			glog.Fatalf("Unable to initialize audio:%v", err)
 		}
 	}
@@ -131,9 +134,23 @@ func main() {
 		vid = device.NewVideo(device.MJPEG, uint32(*vidWidth), uint32(*vidHeight), 2)
 	}
 
+	// Capture signals.
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for sig := range c {
+			if sig == syscall.SIGINT {
+				glog.Info("Terminating Ubiquity")
+				aud.Close()
+				os.Exit(0)
+			}
+		}
+	}()
+
 	// Startup HTTP service.
 	h := httphandler.New(dev, aud, vid)
 	if err := h.Start(*httpHostPort, *res, *sslCert, *sslPrivKey, *ssl); err != nil {
 		glog.Fatalf("Failed to start HTTP: %v", err)
 	}
+
 }
