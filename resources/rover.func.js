@@ -1,6 +1,4 @@
 // Constants.
-// Handle websocket registrations and update Rover data panels.
-
 var CmdType = {
     ERR: 0,
     CMD: 1,
@@ -27,9 +25,9 @@ var CmdType = {
     STATUS: 22,
 }
 
+// Telemetry data from Ubiquity.
 var Statuses = {
     AUDIO: 0,
-
 }
 
 // Control Websocket message handlers
@@ -76,9 +74,9 @@ $(document).ready(function() {
     }
 
 
-    setInterval(myMethod, 5000);
+    setInterval(getTelemetry, 5000);
 
-    function myMethod() {
+    function getTelemetry() {
         //SendControlCmd(CmdType.STATUS)
     }
 
@@ -289,7 +287,8 @@ $(document).ready(function() {
     var handleSuccess = function(stream) {
         var context = new AudioContext();
         var source = context.createMediaStreamSource(stream);
-        var processor = context.createScriptProcessor(16384, 1, 1); 
+      //  var processor = context.createScriptProcessor(16384, 1, 1); 
+        var processor = context.createScriptProcessor(8192, 1, 1); 
 
         source.connect(processor);
         processor.connect(context.destination);

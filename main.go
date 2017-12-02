@@ -123,7 +123,7 @@ func main() {
 	var aud *device.Audio
 	if *enAud {
 		aud = device.NewAudio()
-		if err := aud.Init(512, 1480, 8000, 4000); err != nil {
+		if err := aud.Init(512, 740, 8000, 4000); err != nil {
 			glog.Fatalf("Unable to initialize audio:%v", err)
 		}
 	}

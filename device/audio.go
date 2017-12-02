@@ -22,8 +22,6 @@ type Audio struct {
 	playStop       chan struct{}
 	playStatus     bool // True is currently in playback loop.
 	recStatus      bool // True is current in record loop.
-	playStream     *portaudio.Stream
-	recStream      *portaudio.Stream
 }
 
 func NewAudio() *Audio {
@@ -53,30 +51,10 @@ func (s *Audio) Init(recBufLen, playBufLen int, recSampleRate, playSampleRate fl
 	buf = make([]int16, recBufLen)
 	s.recBuf = buf
 
-	stream, err := portaudio.OpenDefaultStream(0, 1, s.playSampleRate, len(s.playBuf), s.playBuf)
-	if err != nil {
-		glog.Errorf("failed to open output stream:%v", err)
-		return err
-	}
-	s.playStream = stream
-
-	stream, err = portaudio.OpenDefaultStream(1, 0, s.recSampleRate, len(s.recBuf), s.recBuf)
-	if err != nil {
-		glog.Errorf("Failed to open input stream:%v", err)
-		return err
-	}
-	s.recStream = stream
-
 	return nil
 }
 
 func (s *Audio) Close() {
-	if err := s.playStream.Close(); err != nil {
-		glog.Errorf("Failed to close output audio stream: %v", err)
-	}
-	if err := s.recStream.Close(); err != nil {
-		glog.Errorf("Failed to close output audio stream: %v", err)
-	}
 	if err := portaudio.Terminate(); err != nil {
 		glog.Errorf("Failed to terminate portaudio: %v", err)
 	}
@@ -117,8 +95,13 @@ func (s *Audio) StopRec() {
 }
 
 func (s *Audio) rec() {
+	stream, err := portaudio.OpenDefaultStream(1, 0, s.recSampleRate, len(s.recBuf), s.recBuf)
+	if err != nil {
+		glog.Errorf("failed to open output stream:%v", err)
+		return
+	}
 
-	if err := s.recStream.Start(); err != nil {
+	if err := stream.Start(); err != nil {
 		glog.Errorf("Failed to start input stream: %v ", err)
 		return
 	}
@@ -129,15 +112,19 @@ func (s *Audio) rec() {
 	for {
 		select {
 		case <-s.recStop:
-			if err := s.recStream.Stop(); err != nil {
+			if err := stream.Stop(); err != nil {
 				glog.Errorf("Failed to stop input audio stream: %v", err)
 			}
+			if err := stream.Close(); err != nil {
+				glog.Errorf("Failed to close output audio stream: %v", err)
+			}
+
 			glog.Info("Stopped capturing audio from mic")
 			s.recStatus = false
 			return
 
 		default:
-			if err := s.recStream.Read(); err != nil {
+			if err := stream.Read(); err != nil {
 				glog.Errorf("Failed to read input stream: %v", err)
 			}
 			var bufWriter bytes.Buffer
@@ -149,8 +136,13 @@ func (s *Audio) rec() {
 }
 
 func (s *Audio) playback() {
+	stream, err := portaudio.OpenDefaultStream(0, 1, s.playSampleRate, len(s.playBuf), s.playBuf)
+	if err != nil {
+		glog.Errorf("failed to open output stream:%v", err)
+		return
+	}
 
-	if err := s.playStream.Start(); err != nil {
+	if err := stream.Start(); err != nil {
 		glog.Errorf("Failed to start audio out: %v", err)
 		return
 	}
@@ -161,9 +153,13 @@ func (s *Audio) playback() {
 	for {
 		select {
 		case <-s.playStop:
-			if err := s.playStream.Stop(); err != nil {
+			if err := stream.Stop(); err != nil {
 				glog.Errorf("Failed to stop output audio stream: %v", err)
 			}
+			if err := stream.Close(); err != nil {
+				glog.Errorf("Failed to close output audio stream: %v", err)
+			}
+
 			glog.Info("Stopped playback audio from browser")
 			s.playStatus = false
 			return
@@ -174,7 +170,7 @@ func (s *Audio) playback() {
 				glog.Warningf("Failed to convert to binary %v", err)
 				continue
 			}
-			if err := s.playStream.Write(); err != nil {
+			if err := stream.Write(); err != nil {
 				glog.Errorf("Failed to write to audio out: %v", err)
 			}
 		}
