@@ -310,26 +310,25 @@ func (s *Server) audioSock(w http.ResponseWriter, r *http.Request) {
 	}
 	defer c.Close()
 
-	// Playback audio from browser.
+	// Send audio packets to browser.
 	go func() {
 		for {
-			_, data, err := c.ReadMessage()
-			if err != nil {
-				glog.Errorf("Audio websocket read error: %v", err)
+			audData := <-s.audio.In
+			if err := c.WriteMessage(websocket.BinaryMessage, audData.Bytes()); err != nil {
+				glog.Warningf("Websocket write error:%v", err)
 				return
 			}
-			b := bytes.NewBuffer(data)
-			s.audio.Out <- *b
 		}
 	}()
 
-	// Send audio packets to browser.
+	// Playback audio from browser.
 	for {
-		audData := <-s.audio.In
-		if err := c.WriteMessage(websocket.BinaryMessage, audData.Bytes()); err != nil {
-			glog.Warningf("Websocket write error:%v", err)
+		_, data, err := c.ReadMessage()
+		if err != nil {
+			glog.Errorf("Audio websocket read error: %v", err)
 			return
 		}
+		b := bytes.NewBuffer(data)
+		s.audio.Out <- *b
 	}
-
 }
