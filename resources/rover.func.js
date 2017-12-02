@@ -235,7 +235,7 @@ $(document).ready(function() {
         print("ERROR: " + evt.data);
     }
 
-    // downsampleBuffer downsamples and converts to uint16.
+    // downsampleBuffer downsamples and converts to int16 array.
     var downsampleBuffer = function(buffer, sampleRate, outSampleRate) {
         if (outSampleRate == sampleRate) {
             return buffer;
@@ -256,7 +256,6 @@ $(document).ready(function() {
                 accum += buffer[i];
                 count++;
             }
-
             result[offsetResult] = Math.min(1, accum / count) * 0x7FFF;
             offsetResult++;
             offsetBuffer = nextOffsetBuffer;
@@ -274,7 +273,7 @@ $(document).ready(function() {
             return output;
         } */
 
-    function int16ToFloat32(inputArray, startIndex, length) {
+    var int16ToFloat32 = function(inputArray, startIndex, length) {
         var output = new Float32Array(inputArray.length - startIndex);
         for (var i = startIndex; i < length; i++) {
             var int = inputArray[i];
@@ -286,17 +285,17 @@ $(document).ready(function() {
     }
 
     // Send audio packets from browser to Ubiquity.
-    var streamControl;
+    var startRec;
     var handleSuccess = function(stream) {
         var context = new AudioContext();
         var source = context.createMediaStreamSource(stream);
-        var processor = context.createScriptProcessor(2048, 1, 1);
+        var processor = context.createScriptProcessor(1024, 1, 1);
 
         source.connect(processor);
         processor.connect(context.destination);
 
         processor.onaudioprocess = function(e) {
-            if (!streamControl) {
+            if (!startRec) {
                 return;
             }
             var ib = e.inputBuffer;
@@ -307,10 +306,21 @@ $(document).ready(function() {
         };
     };
     navigator.mediaDevices.getUserMedia({
-            audio: true,
-            video: false
-        })
-        .then(handleSuccess);
+        audio: true,
+        video: false
+    }).then(handleSuccess);
+
+    document.querySelector('#rec-start').addEventListener('click', function() {
+        if (document.getElementById('rec-start').checked) {
+            startRec = true;
+            SendControlCmd(CmdType.AUDIO_START, '');
+            console.log("Rec. started");
+        } else {
+            startRec  = false;
+            SendControlCmd(CmdType.AUDIO_STOP, '');
+            console.log("Rec. stopped");
+        }
+    });
 
     // Recieve and play audio packets from Ubiquity.
     var context = new window.AudioContext()
@@ -331,17 +341,5 @@ $(document).ready(function() {
         source.start(0)
     }
 
-    var recStart = document.querySelector('#rec-start');
-    recStart.addEventListener('click', function() {
-        if (document.getElementById('rec-start').checked) {
-            streamControl = true;
-            SendControlCmd(CmdType.AUDIO_START, '');
-            console.log("Rec. started");
-        } else {
-            streamControl = false;
-            SendControlCmd(CmdType.AUDIO_STOP, '');
-            console.log("Rec. stopped");
-        }
-    });
 
 });
