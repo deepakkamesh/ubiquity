@@ -2,8 +2,10 @@ package httphandler
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/deepakkamesh/ubiquity/device"
 	"github.com/golang/glog"
@@ -82,12 +84,42 @@ func (s *Server) Start(hostPort string, resPath string, cert string, privkey str
 
 	// Serve static content from resources dir.
 	fs := http.FileServer(http.Dir(resPath))
-	http.Handle("/", fs)
+
+	// Setup basic auth.
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if checkAuth(w, r) {
+			fs.ServeHTTP(w, r)
+			return
+		}
+
+		w.Header().Set("WWW-Authenticate", `Basic realm="MY REALM"`)
+		w.WriteHeader(401)
+		w.Write([]byte("401 Unauthorized\n"))
+	})
 
 	if ssl {
 		return http.ListenAndServeTLS(hostPort, resPath+"/"+cert, resPath+"/"+privkey, nil)
 	}
 	return http.ListenAndServe(hostPort, nil)
+}
+
+func checkAuth(w http.ResponseWriter, r *http.Request) bool {
+	s := strings.SplitN(r.Header.Get("Authorization"), " ", 2)
+	if len(s) != 2 {
+		return false
+	}
+
+	b, err := base64.StdEncoding.DecodeString(s[1])
+	if err != nil {
+		return false
+	}
+
+	pair := strings.SplitN(string(b), ":", 2)
+	if len(pair) != 2 {
+		return false
+	}
+
+	return pair[0] == "dkg" && pair[1] == "r0v3r"
 }
 
 // controlSock handles the control messages from the http client.
