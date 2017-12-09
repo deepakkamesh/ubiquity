@@ -55,8 +55,6 @@ $(document).ready(function() {
                 };
                 errorContainer.MaterialSnackbar.showSnackbar(err);
 
-            case CmdType.STATUS:
-                //console.log(msg.Data);
         }
     }
 
@@ -73,14 +71,7 @@ $(document).ready(function() {
         wsCtrl.send(cmdJS);
     }
 
-
-    setInterval(getTelemetry, 5000);
-
-    function getTelemetry() {
-        //SendControlCmd(CmdType.STATUS)
-    }
-
-});
+ });
 
 // Callback for keyboard keys Drive Control.
 $(document).keydown(function(e) {
